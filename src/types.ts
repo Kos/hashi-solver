@@ -8,6 +8,8 @@ interface Island {
   value: number;
 }
 
+type PuzzleField = number | null;
+
 export class Puzzle {
   constructor(
     public width: number,
@@ -15,10 +17,10 @@ export class Puzzle {
     public islands: Island[]
   ) {}
 
-  asMatrix() {
-    var columns = [];
+  asMatrix(): PuzzleField[][] {
+    var columns: PuzzleField[][] = [];
     for (let x = 0; x < this.width; ++x) {
-      var column = [];
+      var column: PuzzleField[] = [];
       columns.push(column);
       for (let y = 0; y < this.height; ++y) {
         column.push(null);
@@ -29,57 +31,35 @@ export class Puzzle {
     }
     return columns;
   }
-
-  toString() {
-    let s = "";
-    var columns = this.asMatrix();
-    for (var y = 0; y < this.height; ++y) {
-      for (var x = 0; x < this.width; ++x) {
-        let val = columns[x][y];
-        if (val) {
-          s += val;
-        } else {
-          s += "·";
-        }
-      }
-      s += "\n";
-    }
-    return s;
-  }
 }
-
-/*
-   01234567890123456
- 0
- 1   2====4----3
- 2        |    || 1
- 3        |    2  |
- 4        3=======3
- 5
-*/
-
-/* A puzzle can be represented as a matrix. */
-
-// console.log(puzzle.asMatrix());
-
-/* A puzzle can be rendered */
-
-// console.log(puzzle.toString());
-
-/* A puzzle can have a solution. A solution might be correct or not. A solution might be legal or not. An empty solution is a legal solution too. 
-Solutions are represented by lists 3-tuples (index, index, value). Bridge indices should be sorted.
-*/
 
 interface Bridge {
   from: number;
-  to: number;
+  to: number; // > from
   value: number;
 }
 
-class Solution {
+enum SolutionFieldBridge {
+  SingleHorizontal = "─",
+  DoubleHorizontal = "═",
+  SingleVertical = "│",
+  DoubleVertical = "║",
+}
+
+type SolutionField = number | null | SolutionFieldBridge;
+
+export class Solution {
+  /* A puzzle can have a solution. A solution might be correct or not. A solution might be legal or not. An empty solution is a legal solution too. 
+    Solutions are represented by lists 3-tuples (index, index, value). Bridge indices must be sorted.
+  */
+
   constructor(public bridges: Bridge[]) {}
 
-  isLegal(p: Puzzle) {
+  isLegal(p: Puzzle): boolean {
+    return this.validate(p)[0];
+  }
+
+  validate(p: Puzzle): [boolean, string] {
     /* A solution is legal if:
     - all bridges connect two distinct islands
     - all bridges are normalized
@@ -100,28 +80,40 @@ class Solution {
       let same_y = p.islands[bridge.from].y == p.islands[bridge.to].y;
       if (same_x === same_y) return [false, "not horizontal/vertical"]; // not horizontal or vertical
 
-      // TODO duplicate
-      try {
-        this.toString(p);
-      } catch {
-        return [false, ""];
+      const [_, err] = this.toMatrix(p); // no crossings or duplicates (not representable as matrix)
+      if (err) {
+        return [false, err];
       }
-      return [true, null];
     }
+    return [true, ""];
   }
 
-  toString(p: Puzzle) {
-    const matrix = p.asMatrix();
+  toMatrix(p: Puzzle): [SolutionField[][] | null, string] {
+    const matrix: SolutionField[][] = p.asMatrix();
     for (let bridge of this.bridges) {
-      let dx: number, dy: number, symbol: string;
-      if (p.islands[bridge.from].x == p.islands[bridge.to].x) {
+      let dx: number, dy: number, symbol: SolutionFieldBridge;
+      let horizontal = p.islands[bridge.from].y == p.islands[bridge.to].y;
+      let vertical = p.islands[bridge.from].x == p.islands[bridge.to].x;
+      if (horizontal && vertical) {
+        return [null, "bridge is diagonal: " + bridge];
+      }
+      if (!horizontal && !vertical) {
+        return [null, "bridge is strange: " + bridge];
+      }
+      if (vertical) {
         dx = 0;
         dy = 1;
-        symbol = "│║"[bridge.value - 1];
+        symbol = [
+          SolutionFieldBridge.SingleVertical,
+          SolutionFieldBridge.DoubleVertical,
+        ][bridge.value - 1];
       } else {
         dx = 1;
         dy = 0;
-        symbol = "─═"[bridge.value - 1];
+        symbol = [
+          SolutionFieldBridge.SingleHorizontal,
+          SolutionFieldBridge.DoubleHorizontal,
+        ][bridge.value - 1];
       }
       let cursor = {
         x: p.islands[bridge.from].x + dx,
@@ -131,16 +123,23 @@ class Solution {
         x: p.islands[bridge.to].x,
         y: p.islands[bridge.to].y,
       };
-      while (!(cursor.x == dest.x && cursor.y == dest.y)) {
+      while (cursor.x != dest.x || cursor.y != dest.y) {
         if (matrix[cursor.x][cursor.y] !== null) {
-          throw new Error(`Stuff crossing at x=${cursor.x} y=${cursor.y}`);
+          return [null, `Bridges crossing at x=${cursor.x} y=${cursor.y}`];
         }
         matrix[cursor.x][cursor.y] = symbol;
         cursor.x += dx;
         cursor.y += dy;
       }
     }
-    // TODO dedupe with the other toString
+    return [matrix, ""];
+  }
+
+  renderToString(p: Puzzle): string {
+    const [matrix, err] = this.toMatrix(p);
+    if (!matrix) {
+      return "invalid solution: " + err;
+    }
     let s = "";
     for (var y = 0; y < p.height; ++y) {
       for (var x = 0; x < p.width; ++x) {
@@ -156,13 +155,8 @@ class Solution {
     return s;
   }
 
-  // isCorrect(p: Puzzle) {}
+  // isCorrect(p: Puzzle) {} // TODO
 }
 
-var solution = new Solution([
-  { from: 1, to: 2, value: 1 },
-  { from: 0, to: 1, value: 1 },
-  { from: 2, to: 3, value: 2 },
-]);
 // console.log("isLegal", solution.isLegal(puzzle));
 // console.log(solution.toString(puzzle));

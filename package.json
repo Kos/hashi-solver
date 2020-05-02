@@ -5,6 +5,9 @@
     "@babel/preset-typescript": "^7.9.0",
     "babel-jest": "^25.4.0",
     "jest": "^25.4.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "@types/jest": "^25.2.1"
+  },
+  "dependencies": {
   }
 }
