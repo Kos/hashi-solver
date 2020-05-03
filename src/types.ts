@@ -2,13 +2,16 @@
 - dimensions
 - islands with positiosn 
 */
-interface Island {
+export interface Island {
   x: number;
   y: number;
   value: number;
 }
 
-type PuzzleField = number | null;
+interface PuzzleField {
+  value: number | null;
+  index: number | null;
+}
 
 export class Puzzle {
   constructor(
@@ -23,12 +26,13 @@ export class Puzzle {
       var column: PuzzleField[] = [];
       columns.push(column);
       for (let y = 0; y < this.height; ++y) {
-        column.push(null);
+        column.push({ value: null, index: null });
       }
     }
-    for (let { x, y, value } of this.islands) {
-      columns[x][y] = value;
-    }
+    this.islands.forEach((island, index) => {
+      const { x, y, value } = island;
+      columns[x][y] = { value, index };
+    });
     return columns;
   }
 }
@@ -46,7 +50,11 @@ enum SolutionFieldBridge {
   DoubleVertical = "║",
 }
 
-type SolutionField = number | null | SolutionFieldBridge;
+export interface SolutionField {
+  value: number | null;
+  bridge: SolutionFieldBridge | null;
+  index: number | null;
+}
 
 export class Solution {
   /* A puzzle can have a solution. A solution might be correct or not. A solution might be legal or not. An empty solution is a legal solution too. 
@@ -89,7 +97,12 @@ export class Solution {
   }
 
   toMatrix(p: Puzzle): [SolutionField[][] | null, string] {
-    const matrix: SolutionField[][] = p.asMatrix();
+    const matrix: SolutionField[][] = p
+      .asMatrix()
+      .map((column) =>
+        column.map(({ value, index }) => ({ value, index, bridge: null }))
+      );
+
     for (let bridge of this.bridges) {
       let dx: number, dy: number, symbol: SolutionFieldBridge;
       let horizontal = p.islands[bridge.from].y == p.islands[bridge.to].y;
@@ -124,10 +137,14 @@ export class Solution {
         y: p.islands[bridge.to].y,
       };
       while (cursor.x != dest.x || cursor.y != dest.y) {
-        if (matrix[cursor.x][cursor.y] !== null) {
+        if (matrix[cursor.x][cursor.y].value) {
           return [null, `Bridges crossing at x=${cursor.x} y=${cursor.y}`];
         }
-        matrix[cursor.x][cursor.y] = symbol;
+        matrix[cursor.x][cursor.y] = {
+          value: null,
+          bridge: symbol,
+          index: null,
+        };
         cursor.x += dx;
         cursor.y += dy;
       }
@@ -144,10 +161,12 @@ export class Solution {
     for (var y = 0; y < p.height; ++y) {
       for (var x = 0; x < p.width; ++x) {
         let val = matrix[x][y];
-        if (val === null) {
-          s += "·";
+        if (val.bridge) {
+          s += val.bridge;
+        } else if (val.value) {
+          s += val.value;
         } else {
-          s += val;
+          s += "·";
         }
       }
       s += "\n";

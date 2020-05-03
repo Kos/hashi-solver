@@ -36,6 +36,8 @@ it("should render a simple solution", () => {
       value: 2,
     },
   ]);
+  const [a, b] = solution.validate(puzzle);
+  expect(b).toEqual("");
   expect(solution.isLegal(puzzle)).toBeTruthy();
   expect(solution.renderToString(puzzle)).toEqual(`\
 ·················
@@ -49,6 +51,8 @@ it("should render a simple solution", () => {
 
 it("should solve a simple solution", () => {
   const solution = solve(puzzle);
+  console.log(solution.renderToString(puzzle));
+  expect(solution.isLegal(puzzle)).toBeTruthy();
   expect(solution.renderToString(puzzle)).toEqual(`\
 ·················
 ··2════4────3····
@@ -58,3 +62,12 @@ it("should solve a simple solution", () => {
 ·················
 `);
 });
+
+/*
+·················
+··0════1────2····
+·······│····║··3·
+·······│····4··│·
+·······5═══════6·
+·················
+*/
