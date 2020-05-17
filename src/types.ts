@@ -38,9 +38,9 @@ export class Puzzle {
 }
 
 interface Bridge {
-  from: number;
-  to: number; // > from
-  value: number;
+  readonly from: number;
+  readonly to: number; // > from
+  readonly value: number; // 1 or 2
 }
 
 enum SolutionFieldBridge {
@@ -62,6 +62,10 @@ export class Solution {
   */
 
   constructor(public bridges: Bridge[]) {}
+
+  clone() {
+    return new Solution(this.bridges.slice());
+  }
 
   isLegal(p: Puzzle): boolean {
     return this.validate(p)[0];
