@@ -43,30 +43,47 @@ function solveStep(puzzle: Puzzle, solution: Solution): [Solution, boolean] {
 }
 
 function ensureOneBridge(solution: Solution, from: number, to: number) {
-  // xxx
-  const a = from > to ? to : from;
-  const b = from > to ? from : to;
+  [from, to] = max2(from, to);
 
   for (let i = 0; i < solution.bridges.length; ++i) {
     const bridge = solution.bridges[i];
-    if (bridge.from == a && bridge.to == b) {
+    if (bridge.from == from && bridge.to == to) {
       return;
     }
   }
   // not found - add
   solution.bridges.push({
-    from: a,
-    to: b,
+    from,
+    to,
     value: 1,
   });
 }
 
-function addBridge(solution, from: number, to: number) {
-  const a = from > to ? to : from;
-  const b = from > to ? from : to;
+function addBridge(solution: Solution, from: number, to: number) {
+  [from, to] = max2(from, to);
+  for (let i = 0; i < solution.bridges.length; ++i) {
+    const bridge = solution.bridges[i];
+    if (bridge.from == from && bridge.to == to) {
+      if (bridge.value == 1) {
+        solution.bridges[i] = {
+          from,
+          to,
+          value: 2,
+        };
+        return;
+      }
+      if (bridge.value == 2) {
+        throw new Error("Tried to add a thrid bridge");
+      }
+    }
+  }
   solution.bridges.push({
-    from: a,
-    to: b,
+    from,
+    to,
     value: 1,
   });
+}
+
+function max2(a, b) {
+  return a < b ? [a, b] : [b, a];
 }
