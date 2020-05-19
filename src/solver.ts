@@ -1,12 +1,5 @@
-import { Puzzle, Island, Solution, SolutionField } from "./types";
-import { SolutionContext, analyze } from "./analyzer";
-
-// interface SolverContext {
-//   puzzle: Puzzle;
-//   solution: Solution;
-//   currentBridges: number;
-//   expectedBridges: number;
-// }
+import { Puzzle, Solution } from "./types";
+import { analyze } from "./analyzer";
 
 export function solve(puzzle: Puzzle): Solution {
   let solution = new Solution([]);
@@ -22,13 +15,12 @@ export function solve(puzzle: Puzzle): Solution {
 function solveStep(puzzle: Puzzle, solution: Solution): [Solution, boolean] {
   solution = solution.clone();
   const { metas } = analyze(puzzle, solution);
-  // ...
 
   for (let meta of metas) {
     if (
       meta.neighbours.length == 2 &&
       meta.desiredValue == 3 &&
-      meta.bridges.length < 2
+      meta.bridges.size < 2
     ) {
       ensureOneBridge(solution, meta.index, meta.neighbours[0]);
       ensureOneBridge(solution, meta.index, meta.neighbours[1]);
@@ -37,6 +29,7 @@ function solveStep(puzzle: Puzzle, solution: Solution): [Solution, boolean] {
 
     if (meta.neighbours.length == 1 && meta.desiredValue != meta.currentValue) {
       addBridge(solution, meta.index, meta.neighbours[0]);
+      return [solution, true];
     }
   }
   return [solution, false];
@@ -73,7 +66,7 @@ function addBridge(solution: Solution, from: number, to: number) {
         return;
       }
       if (bridge.value == 2) {
-        throw new Error("Tried to add a thrid bridge");
+        throw new Error("Tried to add a third bridge");
       }
     }
   }

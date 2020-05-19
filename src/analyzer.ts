@@ -3,14 +3,14 @@ Analyzer is responsible for reading a specific Solution (perhaps a partial one) 
 that will be used as the input of the Solver.
 */
 
-import { Puzzle, Island, Solution, SolutionField } from "./types";
+import { Puzzle, Solution, SolutionField, SolutionFieldBridge } from "./types";
 
 interface IslandMeta {
   index: number; // index in Puzzle
-  currentValue: number; // same as bridges.length
-  desiredValue: number; // desired nubmer of islands
-  neighbours: number[]; // indices of islands we could be connected to.
-  bridges: number[]; // indices of islands we're connected to. Double bridge = 1 entry, so that bridges.length <= currentValue.
+  currentValue: number; // current total value of bridges
+  desiredValue: number; // desired total value of bridges
+  neighbours: number[]; // indices of islands we could be connected to (where a bridge can legally be added).
+  bridges: Set<number>; // indices of islands we are currently connected to (where at least one bridge exists).
 }
 
 export interface SolutionContext {
@@ -28,15 +28,13 @@ export function analyze(puzzle: Puzzle, solution: Solution): SolutionContext {
     currentValue: 0,
     desiredValue: island.value,
     neighbours: [],
-    bridges: [],
+    bridges: new Set(),
   }));
 
-  const neighbours = determineNeighbours(puzzle, matrix);
-  saveNeighbours(neighbours, metas);
-  // TODO maybe islands A, B should not be considered 'neighbours' if B is fully occupied and a bridge can no longer be placed?
-  // Do we ever need to consider these? I doubt it...
   saveBridges(solution, metas);
-  console.log(neighbours);
+  const neighbours = determineNeighbours(puzzle, matrix);
+  saveActiveNeighbours(neighbours, metas);
+  // console.log("neighbours", neighbours);
   return {
     metas,
   };
@@ -51,50 +49,69 @@ function determineNeighbours(
   /*
   Given a matrix, for each island in the matrix, collect its neighbours.
   If there's a bridge between two islands, they are not currently considered neighbours.
+
   So for one puzzle, given different intermediate steps, we would see different neighbour maps.
   */
   const neighbourPairs: NeighbourPair[] = [];
 
   for (var y = 0; y < p.height; ++y) {
-    let prev: number | null = null;
+    let lastSeenIslandIndex: number | null = null;
     for (var x = 0; x < p.width; ++x) {
-      let current = matrix[x][y].index;
-      if (current !== null) {
-        if (prev !== null) {
-          neighbourPairs.push([prev, current]);
+      let current: SolutionField = matrix[x][y];
+      if (
+        current.bridge == SolutionFieldBridge.SingleVertical ||
+        current.bridge == SolutionFieldBridge.DoubleVertical
+      ) {
+        lastSeenIslandIndex = null;
+      } else if (current.index !== null) {
+        if (lastSeenIslandIndex !== null) {
+          neighbourPairs.push([lastSeenIslandIndex, current.index]);
         }
-        prev = current;
+        lastSeenIslandIndex = current.index;
       }
     }
   }
 
   for (var x = 0; x < p.width; ++x) {
-    let prev: number | null = null;
+    let lastSeenIslandIndex: number | null = null;
     for (var y = 0; y < p.height; ++y) {
-      let current = matrix[x][y].index;
-      if (current !== null) {
-        if (prev !== null) {
-          neighbourPairs.push([prev, current]);
+      let current: SolutionField = matrix[x][y];
+      if (
+        current.bridge == SolutionFieldBridge.SingleHorizontal ||
+        current.bridge == SolutionFieldBridge.DoubleHorizontal
+      ) {
+        lastSeenIslandIndex = null;
+      } else if (current.index !== null) {
+        if (lastSeenIslandIndex !== null) {
+          neighbourPairs.push([lastSeenIslandIndex, current.index]);
         }
-        prev = current;
+        lastSeenIslandIndex = current.index;
       }
     }
   }
+
   return neighbourPairs;
 }
 
-function saveNeighbours(neighbourPairs: NeighbourPair[], metas: IslandMeta[]) {
+function saveActiveNeighbours(
+  neighbourPairs: NeighbourPair[],
+  metas: IslandMeta[]
+) {
   neighbourPairs.forEach(([a, b]) => {
-    metas[a].neighbours.push(b);
-    metas[b].neighbours.push(a);
+    if (metas[b].currentValue < metas[b].desiredValue) {
+      metas[a].neighbours.push(b);
+    }
+    if (metas[a].currentValue < metas[a].desiredValue) {
+      metas[b].neighbours.push(a);
+    }
   });
 }
 
 function saveBridges(solution: Solution, metas: IslandMeta[]) {
   solution.bridges.forEach((bridge) => {
-    metas[bridge.from].bridges.push(bridge.to);
+    metas[bridge.from].bridges.add(bridge.to);
     metas[bridge.from].currentValue += bridge.value;
-    metas[bridge.to].bridges.push(bridge.from);
+    metas[bridge.to].bridges.add(bridge.from);
     metas[bridge.to].currentValue += bridge.value;
   });
 }

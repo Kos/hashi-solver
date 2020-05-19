@@ -43,7 +43,7 @@ interface Bridge {
   readonly value: number; // 1 or 2
 }
 
-enum SolutionFieldBridge {
+export enum SolutionFieldBridge {
   SingleHorizontal = "─",
   DoubleHorizontal = "═",
   SingleVertical = "│",
