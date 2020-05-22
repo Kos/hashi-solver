@@ -8,24 +8,48 @@ import { solve } from "./solver";
 function MyElem() {
   const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
   const solution = solve(puzzle);
-  console.log(puzzle);
-  console.log(solution);
+
+  function clickHandler(val: number) {
+    console.log("!", val);
+  }
 
   return (
     <div>
-      <MySvg puzzle={puzzle} solution={solution} />
+      <MySvg puzzle={puzzle} solution={solution} onClickNode={clickHandler} />
     </div>
   );
 }
 
-function MySvg({ puzzle, solution }: { puzzle: Puzzle; solution: Solution }) {
+function MySvg({
+  puzzle,
+  solution,
+  onClickNode,
+}: {
+  puzzle: Puzzle;
+  solution: Solution;
+  onClickNode: (islandIndex: number) => void;
+}) {
   const scale = 60;
   const offset = scale / 2;
   const width = puzzle.width * scale;
   const height = puzzle.height * scale;
-  const place = (x) => x * scale + offset;
+  const place = (x: number) => x * scale + offset;
+  const handleClick = React.useCallback(
+    (event) => {
+      onClickNode(+event.currentTarget.dataset.index);
+    },
+    ["onClickNode"]
+  );
+
   return (
-    <svg width={width} height={height} xmlns="http://www.w3.org/2000/svg">
+    <svg
+      width={width}
+      height={height}
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        userSelect: "none",
+      }}
+    >
       {solution.bridges.map((bridge, index) => (
         <Bridge
           key={index}
@@ -42,6 +66,8 @@ function MySvg({ puzzle, solution }: { puzzle: Puzzle; solution: Solution }) {
           cx={place(island.x)}
           cy={place(island.y)}
           text={island.value + ""}
+          onClick={handleClick}
+          index={index}
         />
       ))}
     </svg>
@@ -81,9 +107,16 @@ function Bridge({ x1, x2, y1, y2, double = false }) {
   );
 }
 
-function Circle({ cx = 100, cy = 100, text = "1" }) {
+function Circle({
+  cx = 100,
+  cy = 100,
+  text = "1",
+  className = "",
+  onClick,
+  index,
+}) {
   return (
-    <g>
+    <g onClick={onClick} className={className} data-index={index}>
       <ellipse
         ry="25"
         rx="25"
