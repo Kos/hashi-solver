@@ -74,8 +74,8 @@ it("should load from example format", () => {
 ·3··8·5
 4·2····
 ·2··5·2
-·2··1··
-···2·5·
+2··1···
+··2·5·3
 `);
 });
 
@@ -84,5 +84,16 @@ it("should solve example", () => {
   const solution = solve(puzzle);
   expect(solution.isLegal(puzzle)).toBeTruthy();
   console.log(solution.renderToString(puzzle));
-  expect(solution.renderToString(puzzle)).toEqual(``);
+  expect(solution.renderToString(puzzle)).toEqual(`\
+2·2──2·
+║·│··│1
+6═5─3││
+║1│·║│3
+3│1·║1║
+│3══8═5
+4═2·║·│
+│2══5·2
+2──1│·│
+··2═5═3
+`);
 });

@@ -29,7 +29,8 @@ export class Puzzle {
 
   static fromObject(obj: PuzzleObject): Puzzle {
     const islands: Island[] = [];
-    const { width, height, data } = obj;
+    let { width, height, data } = obj;
+    data = data.replace(/ /g, "");
     for (let i = 0; i < data.length; ++i) {
       const value = +data[i];
       if (isNaN(+value)) continue;

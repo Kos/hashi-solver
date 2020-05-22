@@ -9,7 +9,8 @@ interface IslandMeta {
   index: number; // index in Puzzle
   currentValue: number; // current total value of bridges
   desiredValue: number; // desired total value of bridges
-  neighbours: number[]; // indices of islands we could be connected to (where a bridge can legally be added).
+  neighbours: number[]; // indices of islands reachable using a bridge, without crossing but disregarding for island values
+  activeNeighbours: number[]; // indices of islands we could legally add a bridge (regarding neighbour values and two bridges rule)
   bridges: Set<number>; // indices of islands we are currently connected to (where at least one bridge exists).
 }
 
@@ -28,13 +29,13 @@ export function analyze(puzzle: Puzzle, solution: Solution): SolutionContext {
     currentValue: 0,
     desiredValue: island.value,
     neighbours: [],
+    activeNeighbours: [],
     bridges: new Set(),
   }));
 
   saveBridges(solution, metas);
   const neighbours = determineNeighbours(puzzle, matrix);
   saveActiveNeighbours(neighbours, metas);
-  // console.log("neighbours", neighbours);
   return {
     metas,
   };
@@ -98,11 +99,14 @@ function saveActiveNeighbours(
   metas: IslandMeta[]
 ) {
   neighbourPairs.forEach(([a, b]) => {
+    metas[a].neighbours.push(b);
+    metas[b].neighbours.push(a);
+
     if (metas[b].currentValue < metas[b].desiredValue) {
-      metas[a].neighbours.push(b);
+      metas[a].activeNeighbours.push(b);
     }
     if (metas[a].currentValue < metas[a].desiredValue) {
-      metas[b].neighbours.push(a);
+      metas[b].activeNeighbours.push(a);
     }
   });
 }

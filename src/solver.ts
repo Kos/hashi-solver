@@ -17,31 +17,68 @@ function solveStep(puzzle: Puzzle, solution: Solution): [Solution, boolean] {
   const { metas } = analyze(puzzle, solution);
 
   for (let meta of metas) {
-    if (
-      meta.neighbours.length == 2 &&
-      meta.desiredValue == 3 &&
-      meta.bridges.size < 2
-    ) {
-      ensureOneBridge(solution, meta.index, meta.neighbours[0]);
-      ensureOneBridge(solution, meta.index, meta.neighbours[1]);
-      return [solution, true];
+    if (meta.neighbours.length == 2 && meta.desiredValue == 3) {
+      const added =
+        ensureOneBridge(solution, meta.index, meta.neighbours[0]) ||
+        ensureOneBridge(solution, meta.index, meta.neighbours[1]);
+      if (added) {
+        return [solution, true];
+      }
     }
 
-    if (meta.neighbours.length == 1 && meta.desiredValue != meta.currentValue) {
-      addBridge(solution, meta.index, meta.neighbours[0]);
+    if (meta.neighbours.length == 3 && meta.desiredValue == 5) {
+      const added =
+        ensureOneBridge(solution, meta.index, meta.neighbours[0]) ||
+        ensureOneBridge(solution, meta.index, meta.neighbours[1]) ||
+        ensureOneBridge(solution, meta.index, meta.neighbours[2]);
+      if (added) {
+        return [solution, true];
+      }
+    }
+
+    if (meta.neighbours.length == 3 && meta.desiredValue == 6) {
+      const added =
+        ensureTwoBridges(solution, meta.index, meta.neighbours[0]) ||
+        ensureTwoBridges(solution, meta.index, meta.neighbours[1]) ||
+        ensureTwoBridges(solution, meta.index, meta.neighbours[2]);
+      if (added) {
+        return [solution, true];
+      }
+    }
+
+    if (meta.desiredValue >= 7) {
+      const added =
+        ensureOneBridge(solution, meta.index, meta.neighbours[0]) ||
+        ensureOneBridge(solution, meta.index, meta.neighbours[1]) ||
+        ensureOneBridge(solution, meta.index, meta.neighbours[2]) ||
+        ensureOneBridge(solution, meta.index, meta.neighbours[3]);
+      if (added) {
+        return [solution, true];
+      }
+    }
+
+    if (
+      meta.activeNeighbours.length == 1 &&
+      meta.desiredValue != meta.currentValue
+    ) {
+      addBridge(solution, meta.index, meta.activeNeighbours[0]);
       return [solution, true];
     }
   }
   return [solution, false];
 }
 
-function ensureOneBridge(solution: Solution, from: number, to: number) {
+function ensureOneBridge(
+  solution: Solution,
+  from: number,
+  to: number
+): boolean {
   [from, to] = max2(from, to);
 
   for (let i = 0; i < solution.bridges.length; ++i) {
     const bridge = solution.bridges[i];
     if (bridge.from == from && bridge.to == to) {
-      return;
+      return false;
     }
   }
   // not found - add
@@ -50,6 +87,37 @@ function ensureOneBridge(solution: Solution, from: number, to: number) {
     to,
     value: 1,
   });
+  return true;
+}
+
+function ensureTwoBridges(
+  solution: Solution,
+  from: number,
+  to: number
+): boolean {
+  [from, to] = max2(from, to);
+  for (let i = 0; i < solution.bridges.length; ++i) {
+    const bridge = solution.bridges[i];
+    if (bridge.from == from && bridge.to == to) {
+      if (bridge.value == 1) {
+        solution.bridges[i] = {
+          from,
+          to,
+          value: 2,
+        };
+        return true;
+      }
+      if (bridge.value == 2) {
+        return false;
+      }
+    }
+  }
+  solution.bridges.push({
+    from,
+    to,
+    value: 2,
+  });
+  return true;
 }
 
 function addBridge(solution: Solution, from: number, to: number) {
