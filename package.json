@@ -9,5 +9,9 @@
     "@types/jest": "^25.2.1"
   },
   "dependencies": {
+    "@types/react": "^16.9.35",
+    "@types/react-dom": "^16.9.8",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   }
 }

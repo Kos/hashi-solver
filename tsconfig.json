@@ -3,6 +3,7 @@
     // ...
     "types": ["jest"],
     "lib": ["ES2015", "DOM"],
+    "jsx": "react",
     "strictNullChecks": true,
     "resolveJsonModule": true
     // ...
