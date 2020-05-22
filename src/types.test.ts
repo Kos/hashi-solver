@@ -1,5 +1,6 @@
 import { Puzzle, Solution } from "./types";
 import { solve } from "./solver";
+import * as easyStarters from "../puzzles/conceptis-easy-starters.json";
 
 var puzzle: Puzzle = new Puzzle(17, 6, [
   { x: 2, y: 1, value: 2 },
@@ -49,9 +50,8 @@ it("should render a simple solution", () => {
 `);
 });
 
-it("should solve a simple solution", () => {
+it("should solve a simple puzzle", () => {
   const solution = solve(puzzle);
-  console.log(solution.renderToString(puzzle));
   expect(solution.isLegal(puzzle)).toBeTruthy();
   expect(solution.renderToString(puzzle)).toEqual(`\
 ·················
@@ -63,11 +63,26 @@ it("should solve a simple solution", () => {
 `);
 });
 
-/*
-·················
-··0════1────2····
-·······│····║··3·
-·······│····4··│·
-·······5═══════6·
-·················
-*/
+it("should load from example format", () => {
+  const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
+  expect(puzzle.renderToString()).toEqual(`\
+2·2··2·
+······1
+6·5·3··
+·1····3
+3·1··1·
+·3··8·5
+4·2····
+·2··5·2
+·2··1··
+···2·5·
+`);
+});
+
+it("should solve example", () => {
+  const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
+  const solution = solve(puzzle);
+  expect(solution.isLegal(puzzle)).toBeTruthy();
+  console.log(solution.renderToString(puzzle));
+  expect(solution.renderToString(puzzle)).toEqual(``);
+});

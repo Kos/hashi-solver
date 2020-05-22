@@ -3,7 +3,8 @@
     // ...
     "types": ["jest"],
     "lib": ["ES2015", "DOM"],
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "resolveJsonModule": true
     // ...
   }
 }

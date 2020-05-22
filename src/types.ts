@@ -13,12 +13,34 @@ interface PuzzleField {
   index: number | null;
 }
 
+interface PuzzleObject {
+  // JSON notation for easy input
+  width: number;
+  height: number;
+  data: string;
+}
+
 export class Puzzle {
   constructor(
     public width: number,
     public height: number,
     public islands: Island[]
   ) {}
+
+  static fromObject(obj: PuzzleObject): Puzzle {
+    const islands: Island[] = [];
+    const { width, height, data } = obj;
+    for (let i = 0; i < data.length; ++i) {
+      const value = +data[i];
+      if (isNaN(+value)) continue;
+      islands.push({
+        x: i % width,
+        y: (i / width) | 0,
+        value,
+      });
+    }
+    return new Puzzle(width, height, islands);
+  }
 
   asMatrix(): PuzzleField[][] {
     var columns: PuzzleField[][] = [];
@@ -34,6 +56,10 @@ export class Puzzle {
       columns[x][y] = { value, index };
     });
     return columns;
+  }
+
+  renderToString(): string {
+    return new Solution([]).renderToString(this);
   }
 }
 
