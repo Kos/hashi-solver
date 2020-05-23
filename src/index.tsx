@@ -6,7 +6,7 @@ import { Puzzle, Solution } from "./types";
 import { solve } from "./solver";
 
 function MyElem() {
-  const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
+  const puzzle = Puzzle.fromObject(easyStarters.puzzles[1]);
   const solution = solve(puzzle);
 
   function clickHandler(val: number) {
@@ -40,6 +40,13 @@ function MySvg({
     },
     ["onClickNode"]
   );
+  const islandValues = puzzle.islands.map((x) => 0);
+  for (let bridge of solution.bridges) {
+    islandValues[bridge.from] += bridge.value;
+    islandValues[bridge.to] += bridge.value;
+  }
+  const islandIsFull = (index) =>
+    islandValues[index] == puzzle.islands[index].value;
 
   return (
     <svg
@@ -68,6 +75,7 @@ function MySvg({
           text={island.value + ""}
           onClick={handleClick}
           index={index}
+          full={islandIsFull(index)}
         />
       ))}
     </svg>
@@ -114,7 +122,10 @@ function Circle({
   className = "",
   onClick,
   index,
+  full = false,
 }) {
+  const mainColor = full ? "#ccc" : "#fff";
+  const ld = (25 / 2) * 1.41;
   return (
     <g onClick={onClick} className={className} data-index={index}>
       <ellipse
@@ -124,7 +135,7 @@ function Circle({
         cx={cx}
         strokeWidth="1.5"
         stroke="#000"
-        fill="#fff"
+        fill={mainColor}
       />
       <text
         xmlSpace="preserve"
@@ -141,6 +152,17 @@ function Circle({
       >
         {text}
       </text>
+      {full && (
+        <line
+          x1={cx - ld}
+          y1={cy + ld}
+          x2={cx + ld}
+          y2={cy - ld}
+          strokeWidth="1.5"
+          stroke="#000"
+          fill="none"
+        />
+      )}
     </g>
   );
 }
