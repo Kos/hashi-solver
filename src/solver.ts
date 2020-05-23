@@ -3,6 +3,10 @@ import { analyze } from "./analyzer";
 
 export function solve(puzzle: Puzzle): Solution {
   let solution = new Solution([]);
+  return solveFrom(puzzle, solution);
+}
+
+export function solveFrom(puzzle: Puzzle, solution: Solution) {
   for (;;) {
     let [newSolution, successfulStep] = solveStep(puzzle, solution);
     if (!successfulStep) {
@@ -12,7 +16,10 @@ export function solve(puzzle: Puzzle): Solution {
   }
 }
 
-function solveStep(puzzle: Puzzle, solution: Solution): [Solution, boolean] {
+export function solveStep(
+  puzzle: Puzzle,
+  solution: Solution
+): [Solution, boolean] {
   solution = solution.clone();
   const { metas } = analyze(puzzle, solution);
 

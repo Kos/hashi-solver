@@ -3,21 +3,119 @@ import * as ReactDOM from "react-dom";
 
 import * as easyStarters from "../puzzles/conceptis-easy-starters.json";
 import { Puzzle, Solution } from "./types";
-import { solve } from "./solver";
+import { solveFrom, solveStep } from "./solver";
+import { Button, Dropdown, DropdownItemProps } from "semantic-ui-react";
+import "semantic-ui-css/semantic.min.css";
 
-function MyElem() {
-  const puzzle = Puzzle.fromObject(easyStarters.puzzles[1]);
-  const solution = solve(puzzle);
+interface PuzzleController {
+  puzzle: Puzzle;
+  solution: Solution;
+  options: DropdownItemProps[];
+
+  clickHandler: (index: number) => void;
+  loadSolution: (solutionIndex: number) => void;
+  solve: () => void;
+  solveStep: () => void;
+  reset: () => void;
+}
+
+function usePuzzleController(): PuzzleController {
+  const [state, setState] = React.useState(() => {
+    const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
+    const solution = new Solution([]);
+    return {
+      puzzle,
+      solution,
+    };
+  });
+  const { puzzle, solution } = state;
+  const updateState = (up) =>
+    setState((prevState) => ({ ...prevState, ...up }));
 
   function clickHandler(val: number) {
     console.log("!", val);
   }
 
+  const options = easyStarters.puzzles.map((puzzle, index) => ({
+    key: index,
+    value: index,
+    text: `${easyStarters.name} - ${index + 1}`,
+  }));
+
+  return {
+    puzzle,
+    solution,
+    clickHandler,
+    options,
+
+    loadSolution(index: number) {
+      setState({
+        puzzle: Puzzle.fromObject(easyStarters.puzzles[index]),
+        solution: new Solution([]),
+      });
+    },
+
+    solve() {
+      const newSolution = solveFrom(puzzle, solution);
+      updateState({
+        solution: newSolution,
+      });
+    },
+
+    solveStep() {
+      const [newSolution, result] = solveStep(puzzle, solution);
+      updateState({
+        solution: newSolution,
+      });
+    },
+
+    reset() {
+      updateState({
+        solution: new Solution([]);
+      });
+    }
+  };
+}
+
+function MyElem() {
+  const controller = usePuzzleController();
+  const { puzzle, solution, clickHandler, options } = controller;
+  const onChangePuzzleDropdown = function (event, data) {
+    controller.loadSolution(data.value);
+  };
   return (
-    <div>
+    <Container>
       <MySvg puzzle={puzzle} solution={solution} onClickNode={clickHandler} />
-    </div>
+      <Panel>
+        <h2>Select level</h2>
+        <div>
+          <Dropdown
+            search
+            selection
+            placeholder="bla"
+            options={options}
+            onChange={onChangePuzzleDropdown}
+          />
+        </div>
+        <div>
+          <Button onClick={controller.reset}>Reset</Button>
+          <Button onClick={controller.solve}>Solve</Button>
+          <Button onClick={controller.solveStep}>Solve step</Button>
+        </div>
+      </Panel>
+    </Container>
   );
+}
+
+function Container({ children }) {
+  const style = {
+    display: "flex",
+  };
+  return <div style={style}>{children}</div>;
+}
+
+function Panel({ children }) {
+  return <div>{children}</div>;
 }
 
 function MySvg({
