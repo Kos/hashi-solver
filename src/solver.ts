@@ -24,6 +24,16 @@ export function solveStep(
   const { metas } = analyze(puzzle, solution);
 
   for (let meta of metas) {
+    if (
+      meta.activeNeighbours.length == 1 &&
+      meta.desiredValue != meta.currentValue
+    ) {
+      for (let i = 0; i < meta.desiredValue - meta.currentValue; ++i) {
+        addBridge(solution, meta.index, meta.activeNeighbours[0]);
+      }
+      return [solution, true];
+    }
+
     if (meta.neighbours.length == 2 && meta.desiredValue == 3) {
       const added = [
         ensureOneBridge(solution, meta.index, meta.neighbours[0]),
@@ -78,14 +88,6 @@ export function solveStep(
       if (added) {
         return [solution, true];
       }
-    }
-
-    if (
-      meta.activeNeighbours.length == 1 &&
-      meta.desiredValue != meta.currentValue
-    ) {
-      addBridge(solution, meta.index, meta.activeNeighbours[0]);
-      return [solution, true];
     }
   }
   return [solution, false];
