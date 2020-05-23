@@ -25,51 +25,56 @@ export function solveStep(
 
   for (let meta of metas) {
     if (meta.neighbours.length == 2 && meta.desiredValue == 3) {
-      const added =
-        ensureOneBridge(solution, meta.index, meta.neighbours[0]) ||
-        ensureOneBridge(solution, meta.index, meta.neighbours[1]);
+      const added = [
+        ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+      ].some((x) => x);
       if (added) {
         return [solution, true];
       }
     }
 
     if (meta.neighbours.length == 3 && meta.desiredValue == 5) {
-      const added =
-        ensureOneBridge(solution, meta.index, meta.neighbours[0]) ||
-        ensureOneBridge(solution, meta.index, meta.neighbours[1]) ||
-        ensureOneBridge(solution, meta.index, meta.neighbours[2]);
+      const added = [
+        ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+        ensureOneBridge(solution, meta.index, meta.neighbours[2]),
+      ].some((x) => x);
       if (added) {
         return [solution, true];
       }
     }
 
     if (meta.neighbours.length == 3 && meta.desiredValue == 6) {
-      const added =
-        ensureTwoBridges(solution, meta.index, meta.neighbours[0]) ||
-        ensureTwoBridges(solution, meta.index, meta.neighbours[1]) ||
-        ensureTwoBridges(solution, meta.index, meta.neighbours[2]);
+      const added = [
+        ensureTwoBridges(solution, meta.index, meta.neighbours[0]),
+        ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
+        ensureTwoBridges(solution, meta.index, meta.neighbours[2]),
+      ].some((x) => x);
       if (added) {
         return [solution, true];
       }
     }
 
     if (meta.desiredValue == 7) {
-      const added =
-        ensureOneBridge(solution, meta.index, meta.neighbours[0]) ||
-        ensureOneBridge(solution, meta.index, meta.neighbours[1]) ||
-        ensureOneBridge(solution, meta.index, meta.neighbours[2]) ||
-        ensureOneBridge(solution, meta.index, meta.neighbours[3]);
+      const added = [
+        ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+        ensureOneBridge(solution, meta.index, meta.neighbours[2]),
+        ensureOneBridge(solution, meta.index, meta.neighbours[3]),
+      ].some((x) => x);
       if (added) {
         return [solution, true];
       }
     }
 
     if (meta.desiredValue == 8) {
-      const added =
-        ensureTwoBridges(solution, meta.index, meta.neighbours[0]) ||
-        ensureTwoBridges(solution, meta.index, meta.neighbours[1]) ||
-        ensureTwoBridges(solution, meta.index, meta.neighbours[2]) ||
-        ensureTwoBridges(solution, meta.index, meta.neighbours[3]);
+      const added = [
+        ensureTwoBridges(solution, meta.index, meta.neighbours[0]),
+        ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
+        ensureTwoBridges(solution, meta.index, meta.neighbours[2]),
+        ensureTwoBridges(solution, meta.index, meta.neighbours[3]),
+      ].some((x) => x);
       if (added) {
         return [solution, true];
       }
