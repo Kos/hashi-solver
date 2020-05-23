@@ -46,12 +46,23 @@ function solveStep(puzzle: Puzzle, solution: Solution): [Solution, boolean] {
       }
     }
 
-    if (meta.desiredValue >= 7) {
+    if (meta.desiredValue == 7) {
       const added =
         ensureOneBridge(solution, meta.index, meta.neighbours[0]) ||
         ensureOneBridge(solution, meta.index, meta.neighbours[1]) ||
         ensureOneBridge(solution, meta.index, meta.neighbours[2]) ||
         ensureOneBridge(solution, meta.index, meta.neighbours[3]);
+      if (added) {
+        return [solution, true];
+      }
+    }
+
+    if (meta.desiredValue == 8) {
+      const added =
+        ensureTwoBridges(solution, meta.index, meta.neighbours[0]) ||
+        ensureTwoBridges(solution, meta.index, meta.neighbours[1]) ||
+        ensureTwoBridges(solution, meta.index, meta.neighbours[2]) ||
+        ensureTwoBridges(solution, meta.index, meta.neighbours[3]);
       if (added) {
         return [solution, true];
       }
