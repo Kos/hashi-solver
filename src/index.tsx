@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import * as easyStarters from "../puzzles/conceptis-easy-starters.json";
 import { Puzzle, Solution } from "./types";
-import { solveFrom, solveStep } from "./solver";
+import { solveFrom, solveStep, addBridge } from "./solver";
 import { Button, Dropdown, DropdownItemProps } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 
@@ -134,12 +134,51 @@ function MySvg({
   const width = puzzle.width * scale;
   const height = puzzle.height * scale;
   const place = (x: number) => x * scale + offset;
-  const handleClick = React.useCallback(
-    (event) => {
-      onClickNode(+event.currentTarget.dataset.index);
-    },
-    ["onClickNode"]
-  );
+
+  const dragPos = React.useRef<null | { x: number; y: number }>(null);
+  const [dragOrigin, setDragOrigin] = React.useState<null | number>(null);
+  const [dragVector, setDragVector] = React.useState<null | {
+    x: number;
+    y: number;
+  }>(null);
+  const handleIslandMouseDown = (event) => {
+    const islandIndex = +event.currentTarget.dataset.index;
+    dragPos.current = { x: event.pageX, y: event.pageY };
+    setDragOrigin(islandIndex);
+  };
+  const handleMouseUp = (event) => {
+    dragPos.current = null;
+    setDragVector(null);
+    setDragOrigin(null);
+  };
+  const handleMouseMove = (event) => {
+    if (dragPos.current === null) {
+      return;
+    }
+    const nx = event.pageX;
+    const ny = event.pageY;
+    const { x, y } = dragPos.current;
+    const dx = nx - x;
+    const dy = ny - y;
+    if (dy == dx) return;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      setDragVector({
+        x: Math.sign(dx),
+        y: 0,
+      });
+    } else {
+      setDragVector({
+        x: 0,
+        y: Math.sign(dy),
+      });
+    }
+  };
+
+  if (dragOrigin && dragVector) {
+    solution = solution.clone();
+    addBridgeByVector(puzzle, solution, dragOrigin, dragVector);
+  }
+
   const islandValues = puzzle.islands.map((x) => 0);
   for (let bridge of solution.bridges) {
     islandValues[bridge.from] += bridge.value;
@@ -156,6 +195,8 @@ function MySvg({
       style={{
         userSelect: "none",
       }}
+      onMouseUp={handleMouseUp}
+      onMouseMove={handleMouseMove}
     >
       {solution.bridges.map((bridge, index) => (
         <Bridge
@@ -174,7 +215,7 @@ function MySvg({
           cx={place(island.x)}
           cy={place(island.y)}
           text={island.value + ""}
-          onClick={handleClick}
+          onMouseDown={handleIslandMouseDown}
           index={index}
           full={islandIsFull(index)}
         />
@@ -226,14 +267,14 @@ function Circle({
   cy = 100,
   text = "1",
   className = "",
-  onClick,
   index,
   full = false,
+  onMouseDown,
 }) {
   const mainColor = full ? "#ccc" : "#fff";
   const ld = (25 / 2) * 1.41;
   return (
-    <g onClick={onClick} className={className} data-index={index}>
+    <g onMouseDown={onMouseDown} className={className} data-index={index}>
       <ellipse
         ry="25"
         rx="25"
@@ -276,3 +317,32 @@ function Circle({
 const div = document.createElement("div");
 document.body.appendChild(div);
 ReactDOM.render(<MyElem />, div);
+
+function addBridgeByVector(
+  puzzle: Puzzle,
+  solution: Solution,
+  dragOrigin: number,
+  dragVector: { x: number; y: number }
+) {
+  const [matrix, err] = solution.toMatrix(puzzle);
+  if (!matrix) {
+    console.error("addBridgeByVector", err);
+    return;
+  }
+  let { x, y } = puzzle.islands[dragOrigin];
+  while (true) {
+    x += dragVector.x;
+    y += dragVector.y;
+    if (x < 0 || x >= puzzle.width || y < 0 || y >= puzzle.height) {
+      break;
+    }
+    if (matrix[x][y].bridge) {
+      break;
+    }
+    const index = matrix[x][y].index;
+    if (index !== null) {
+      addBridge(solution, dragOrigin, index);
+      break;
+    }
+  }
+}

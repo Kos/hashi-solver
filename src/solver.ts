@@ -148,7 +148,7 @@ function ensureTwoBridges(
   return true;
 }
 
-function addBridge(solution: Solution, from: number, to: number) {
+export function addBridge(solution: Solution, from: number, to: number) {
   [from, to] = max2(from, to);
   for (let i = 0; i < solution.bridges.length; ++i) {
     const bridge = solution.bridges[i];
