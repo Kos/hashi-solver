@@ -111,6 +111,7 @@ function ensureOneBridge(
     from,
     to,
     value: 1,
+    emphasis: 1,
   });
   return true;
 }
@@ -129,6 +130,7 @@ function ensureTwoBridges(
           from,
           to,
           value: 2,
+          emphasis: 1,
         };
         return true;
       }
@@ -141,6 +143,7 @@ function ensureTwoBridges(
     from,
     to,
     value: 2,
+    emphasis: 2,
   });
   return true;
 }
@@ -155,6 +158,7 @@ function addBridge(solution: Solution, from: number, to: number) {
           from,
           to,
           value: 2,
+          emphasis: 1,
         };
         return;
       }
@@ -167,6 +171,7 @@ function addBridge(solution: Solution, from: number, to: number) {
     from,
     to,
     value: 1,
+    emphasis: 1,
   });
 }
 

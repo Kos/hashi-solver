@@ -71,9 +71,9 @@ function usePuzzleController(): PuzzleController {
 
     reset() {
       updateState({
-        solution: new Solution([]);
+        solution: new Solution([]),
       });
-    }
+    },
   };
 }
 
@@ -90,11 +90,13 @@ function MyElem() {
         <h2>Select level</h2>
         <div>
           <Dropdown
+            fluid
             search
             selection
             placeholder="bla"
             options={options}
             onChange={onChangePuzzleDropdown}
+            defaultValue={0}
           />
         </div>
         <div>
@@ -163,6 +165,7 @@ function MySvg({
           x2={place(puzzle.islands[bridge.to].x)}
           y2={place(puzzle.islands[bridge.to].y)}
           double={bridge.value == 2}
+          emphasis={bridge.emphasis}
         />
       ))}
       {puzzle.islands.map((island, index) => (
@@ -180,7 +183,7 @@ function MySvg({
   );
 }
 
-function Bridge({ x1, x2, y1, y2, double = false }) {
+function Bridge({ x1, x2, y1, y2, double = false, emphasis = 0 }) {
   const spread = 4;
   const offsetIndices = double ? [1, 2] : [0];
   const offsets =
@@ -195,6 +198,11 @@ function Bridge({ x1, x2, y1, y2, double = false }) {
           { x: 0, y: -spread },
           { x: 0, y: spread },
         ];
+  const widths = [
+    ["1.5", "1.5", "1.5"],
+    ["3.5", "3.5", "1.5"],
+    ["3.5", "3.5", "3.5"],
+  ][emphasis];
   return (
     <g>
       {offsetIndices.map((i) => (
@@ -204,7 +212,7 @@ function Bridge({ x1, x2, y1, y2, double = false }) {
           y1={y1 + offsets[i].y}
           x2={x2 + offsets[i].x}
           y2={y2 + offsets[i].y}
-          strokeWidth="1.5"
+          strokeWidth={widths[i]}
           stroke="#000"
           fill="none"
         />

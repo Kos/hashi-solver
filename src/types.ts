@@ -68,6 +68,7 @@ interface Bridge {
   readonly from: number;
   readonly to: number; // > from
   readonly value: number; // 1 or 2
+  readonly emphasis: number; // 0 or 1 or 2, to mark most recent move for display
 }
 
 export enum SolutionFieldBridge {
@@ -91,7 +92,9 @@ export class Solution {
   constructor(public bridges: Bridge[]) {}
 
   clone() {
-    return new Solution(this.bridges.slice());
+    return new Solution(
+      this.bridges.map((bridge) => ({ ...bridge, emphasis: 0 }))
+    );
   }
 
   isLegal(p: Puzzle): boolean {
