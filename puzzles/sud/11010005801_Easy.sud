@@ -1,0 +1,43 @@
+<Hashi_Puzzle Format="XmlBased" Profile="ClassicHashi-9x13 - Easy" CreateBuilderVersion="8.47.6237.25044" DifficultyRatingThresholds="0,0,0,2,2.8,4.5" CreationTime="2/13/2017 5:27:13 PM" GUID="5d87f76a-acf7-49aa-b569-0c450b07e993" Width="9" Height="13">
+  <Data>
+    <Island Number="2" X="0" Y="0" />
+    <Island Number="2" X="0" Y="2" />
+    <Island Number="2" X="0" Y="5" />
+    <Island Number="2" X="0" Y="7" />
+    <Island Number="2" X="0" Y="9" />
+    <Island Number="1" X="0" Y="11" />
+    <Island Number="3" X="1" Y="1" />
+    <Island Number="4" X="1" Y="3" />
+    <Island Number="3" X="1" Y="6" />
+    <Island Number="3" X="1" Y="10" />
+    <Island Number="3" X="1" Y="12" />
+    <Island Number="2" X="2" Y="0" />
+    <Island Number="2" X="2" Y="5" />
+    <Island Number="6" X="2" Y="8" />
+    <Island Number="3" X="2" Y="11" />
+    <Island Number="2" X="3" Y="1" />
+    <Island Number="2" X="3" Y="10" />
+    <Island Number="2" X="3" Y="12" />
+    <Island Number="2" X="4" Y="0" />
+    <Island Number="5" X="4" Y="3" />
+    <Island Number="3" X="4" Y="6" />
+    <Island Number="3" X="4" Y="8" />
+    <Island Number="1" X="4" Y="11" />
+    <Island Number="3" X="5" Y="7" />
+    <Island Number="8" X="5" Y="10" />
+    <Island Number="4" X="5" Y="12" />
+    <Island Number="2" X="6" Y="4" />
+    <Island Number="3" X="6" Y="6" />
+    <Island Number="1" X="6" Y="9" />
+    <Island Number="1" X="7" Y="0" />
+    <Island Number="4" X="7" Y="3" />
+    <Island Number="1" X="7" Y="5" />
+    <Island Number="1" X="7" Y="7" />
+    <Island Number="2" X="7" Y="10" />
+    <Island Number="2" X="8" Y="1" />
+    <Island Number="3" X="8" Y="4" />
+    <Island Number="2" X="8" Y="6" />
+    <Island Number="3" X="8" Y="9" />
+    <Island Number="2" X="8" Y="12" />
+  </Data>
+</Hashi_Puzzle>
