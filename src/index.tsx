@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import * as easyStarters from "../puzzles/ConceptisEasy.json";
 import { Puzzle, Solution, SolutionFieldBridge } from "./types";
-import { solveFrom, solveStep, addBridge, addHighlight } from "./solver";
+import { solveFrom, solveStep, toggleBridge, addHighlight } from "./solver";
 import { Button, Dropdown, DropdownItemProps } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 
@@ -16,6 +16,7 @@ interface PuzzleController {
   solve: () => void;
   solveStep: () => void;
   reset: () => void;
+  toggleBridge: (from: number, to: number) => void;
 }
 
 function usePuzzleController(): PuzzleController {
@@ -72,18 +73,30 @@ function usePuzzleController(): PuzzleController {
         solution: new Solution([]),
       });
     },
+
+    toggleBridge(from, to) {
+      const newSolution = solution.clone();
+      toggleBridge(newSolution, from, to);
+      updateState({
+        solution: newSolution,
+      });
+    },
   };
 }
 
 function MyElem() {
   const controller = usePuzzleController();
-  const { puzzle, solution, options } = controller;
+  const { puzzle, solution, options, toggleBridge } = controller;
   const onChangePuzzleDropdown = function (event, data) {
     controller.loadSolution(data.value);
   };
   return (
     <Container>
-      <MySvg puzzle={puzzle} solution={solution} />
+      <MySvg
+        puzzle={puzzle}
+        solution={solution}
+        onToggleBridge={toggleBridge}
+      />
       <Panel>
         <h2>Select level</h2>
         <div>
@@ -118,7 +131,15 @@ function Panel({ children }) {
   return <div>{children}</div>;
 }
 
-function MySvg({ puzzle, solution }: { puzzle: Puzzle; solution: Solution }) {
+function MySvg({
+  puzzle,
+  solution,
+  onToggleBridge,
+}: {
+  puzzle: Puzzle;
+  solution: Solution;
+  onToggleBridge: (from: number, to: number) => void;
+}) {
   const scale = 60;
   const offset = scale / 2;
   const width = puzzle.width * scale;
@@ -144,6 +165,11 @@ function MySvg({ puzzle, solution }: { puzzle: Puzzle; solution: Solution }) {
     dragOriginIndexRef.current = islandIndex;
   };
   const handleMouseUp = (event) => {
+    if (highlightedBridge !== null) {
+      const { from, to } = highlightedBridge;
+      console.log("onToggleBridge", from, to);
+      onToggleBridge(from, to);
+    }
     dragOriginPositionRef.current = null;
     dragOriginIndexRef.current = null;
     setHighlightedBridge(null);

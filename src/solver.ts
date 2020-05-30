@@ -171,6 +171,7 @@ export function addBridge(solution: Solution, from: number, to: number) {
     from,
     to,
     value: 1,
+    emphasis: 1,
   });
 }
 
@@ -181,6 +182,35 @@ export function addHighlight(solution: Solution, from: number, to: number) {
     to,
     value: 0,
     highlight: true,
+  });
+}
+
+export function toggleBridge(solution: Solution, from: number, to: number) {
+  [from, to] = max2(from, to);
+  // TODO analyze, prevent adding bridges over limit.. Or we could stash that in isLegal instead
+  for (let i = 0; i < solution.bridges.length; ++i) {
+    const bridge = solution.bridges[i];
+    if (bridge.from == from && bridge.to == to) {
+      if (bridge.value == 1) {
+        solution.bridges[i] = {
+          from,
+          to,
+          value: 2,
+          emphasis: 1,
+        };
+        return;
+      }
+      if (bridge.value == 2) {
+        solution.bridges.splice(i, 1);
+        return;
+      }
+    }
+  }
+  solution.bridges.push({
+    from,
+    to,
+    value: 1,
+    emphasis: 1,
   });
 }
 
