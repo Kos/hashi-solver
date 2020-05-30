@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import * as easyStarters from "../puzzles/conceptis-easy-starters.json";
+import * as easyStarters from "../puzzles/ConceptisEasy.json";
 import { Puzzle, Solution } from "./types";
 import { solveFrom, solveStep, addBridge } from "./solver";
 import { Button, Dropdown, DropdownItemProps } from "semantic-ui-react";

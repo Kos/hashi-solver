@@ -17,7 +17,8 @@ interface PuzzleObject {
   // JSON notation for easy input
   width: number;
   height: number;
-  data: string;
+  data?: string;
+  islands?: Island[];
 }
 
 export class Puzzle {
@@ -28,17 +29,23 @@ export class Puzzle {
   ) {}
 
   static fromObject(obj: PuzzleObject): Puzzle {
-    const islands: Island[] = [];
-    let { width, height, data } = obj;
-    data = data.replace(/ /g, "");
-    for (let i = 0; i < data.length; ++i) {
-      const value = +data[i];
-      if (isNaN(+value)) continue;
-      islands.push({
-        x: i % width,
-        y: (i / width) | 0,
-        value,
-      });
+    let { width, height, data, islands } = obj;
+
+    if (data) {
+      islands = [];
+      data = data.replace(/ /g, "");
+      for (let i = 0; i < data.length; ++i) {
+        const value = +data[i];
+        if (isNaN(+value)) continue;
+        islands.push({
+          x: i % width,
+          y: (i / width) | 0,
+          value,
+        });
+      }
+    }
+    if (!islands) {
+      islands = [];
     }
     return new Puzzle(width, height, islands);
   }

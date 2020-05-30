@@ -1,6 +1,6 @@
 import { Puzzle, Solution } from "./types";
 import { solve } from "./solver";
-import * as easyStarters from "../puzzles/conceptis-easy-starters.json";
+import * as easyStarters from "../puzzles/ConceptisEasy.json";
 
 var puzzle: Puzzle = new Puzzle(17, 6, [
   { x: 2, y: 1, value: 2 },
@@ -30,11 +30,13 @@ it("should render a simple solution", () => {
       from: 0,
       to: 1,
       value: 1,
+      emphasis: 0,
     },
     {
       from: 2,
       to: 4,
       value: 2,
+      emphasis: 0,
     },
   ]);
   const [a, b] = solution.validate(puzzle);
@@ -66,34 +68,39 @@ it("should solve a simple puzzle", () => {
 it("should load from example format", () => {
   const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
   expect(puzzle.renderToString()).toEqual(`\
-2·2··2·
-······1
-6·5·3··
-·1····3
-3·1··1·
-·3··8·5
-4·2····
-·2··5·2
-2··1···
-··2·5·3
+3·3·3··2·
+········1
+4··1·3·4·
+·1··2···3
+4·3····1·
+·····2··4
+3··2··3··
+·········
+··6·3·2·2
+3········
+··3··3·2·
+2···2·1··
+·2·3·3··3
 `);
 });
 
 it("should solve example", () => {
-  const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
+  const puzzle = Puzzle.fromObject(easyStarters.puzzles[3]);
   const solution = solve(puzzle);
   expect(solution.isLegal(puzzle)).toBeTruthy();
-  console.log(solution.renderToString(puzzle));
   expect(solution.renderToString(puzzle)).toEqual(`\
-2·2──2·
-║·│··│1
-6═5─3││
-║1│·║│3
-3│1·║1║
-│3══8═5
-4═2·║·│
-│2══5·2
-2──1│·│
-··2═5═3
+2──2─2─1·
+│·3─2───2
+│·║1──2·│
+4═8═3·│·1
+│·║·│·2··
+│·4·│1│··
+2·║·1│3═3
+│·3──3─2│
+│······││
+3─3·2═3│2
+│·║···│1│
+│·3──1│·│
+3═══3─4═3
 `);
 });
