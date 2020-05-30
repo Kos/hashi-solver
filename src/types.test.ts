@@ -30,13 +30,11 @@ it("should render a simple solution", () => {
       from: 0,
       to: 1,
       value: 1,
-      emphasis: 0,
     },
     {
       from: 2,
       to: 4,
       value: 2,
-      emphasis: 0,
     },
   ]);
   const [a, b] = solution.validate(puzzle);

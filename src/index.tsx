@@ -2,8 +2,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import * as easyStarters from "../puzzles/ConceptisEasy.json";
-import { Puzzle, Solution } from "./types";
-import { solveFrom, solveStep, addBridge } from "./solver";
+import { Puzzle, Solution, SolutionFieldBridge } from "./types";
+import { solveFrom, solveStep, addBridge, addHighlight } from "./solver";
 import { Button, Dropdown, DropdownItemProps } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 
@@ -12,7 +12,6 @@ interface PuzzleController {
   solution: Solution;
   options: DropdownItemProps[];
 
-  clickHandler: (index: number) => void;
   loadSolution: (solutionIndex: number) => void;
   solve: () => void;
   solveStep: () => void;
@@ -45,7 +44,6 @@ function usePuzzleController(): PuzzleController {
   return {
     puzzle,
     solution,
-    clickHandler,
     options,
 
     loadSolution(index: number) {
@@ -79,13 +77,13 @@ function usePuzzleController(): PuzzleController {
 
 function MyElem() {
   const controller = usePuzzleController();
-  const { puzzle, solution, clickHandler, options } = controller;
+  const { puzzle, solution, options } = controller;
   const onChangePuzzleDropdown = function (event, data) {
     controller.loadSolution(data.value);
   };
   return (
     <Container>
-      <MySvg puzzle={puzzle} solution={solution} onClickNode={clickHandler} />
+      <MySvg puzzle={puzzle} solution={solution} />
       <Panel>
         <h2>Select level</h2>
         <div>
@@ -120,15 +118,7 @@ function Panel({ children }) {
   return <div>{children}</div>;
 }
 
-function MySvg({
-  puzzle,
-  solution,
-  onClickNode,
-}: {
-  puzzle: Puzzle;
-  solution: Solution;
-  onClickNode: (islandIndex: number) => void;
-}) {
+function MySvg({ puzzle, solution }: { puzzle: Puzzle; solution: Solution }) {
   const scale = 60;
   const offset = scale / 2;
   const width = puzzle.width * scale;
@@ -143,7 +133,11 @@ function MySvg({
   }>(null);
   const handleIslandMouseDown = (event) => {
     const islandIndex = +event.currentTarget.dataset.index;
-    dragPos.current = { x: event.pageX, y: event.pageY };
+    const rect = event.currentTarget.getBoundingClientRect();
+    dragPos.current = {
+      x: (rect.right + rect.left) / 2,
+      y: (rect.bottom + rect.top) / 2,
+    };
     setDragOrigin(islandIndex);
   };
   const handleMouseUp = (event) => {
@@ -206,7 +200,8 @@ function MySvg({
           x2={place(puzzle.islands[bridge.to].x)}
           y2={place(puzzle.islands[bridge.to].y)}
           double={bridge.value == 2}
-          emphasis={bridge.emphasis}
+          emphasis={bridge.emphasis || 0}
+          highlight={bridge.highlight || false}
         />
       ))}
       {puzzle.islands.map((island, index) => (
@@ -224,7 +219,15 @@ function MySvg({
   );
 }
 
-function Bridge({ x1, x2, y1, y2, double = false, emphasis = 0 }) {
+function Bridge({
+  x1,
+  x2,
+  y1,
+  y2,
+  double = false,
+  emphasis = 0,
+  highlight = true,
+}) {
   const spread = 4;
   const offsetIndices = double ? [1, 2] : [0];
   const offsets =
@@ -246,18 +249,28 @@ function Bridge({ x1, x2, y1, y2, double = false, emphasis = 0 }) {
   ][emphasis];
   return (
     <g>
-      {offsetIndices.map((i) => (
+      {highlight && (
         <line
-          key={i}
-          x1={x1 + offsets[i].x}
-          y1={y1 + offsets[i].y}
-          x2={x2 + offsets[i].x}
-          y2={y2 + offsets[i].y}
-          strokeWidth={widths[i]}
-          stroke="#000"
-          fill="none"
+          x1={x1}
+          y1={y1}
+          x2={x2}
+          y2={y2}
+          strokeWidth={20}
+          stroke="hotpink"
         />
-      ))}
+      )}
+      {!highlight &&
+        offsetIndices.map((i) => (
+          <line
+            key={i}
+            x1={x1 + offsets[i].x}
+            y1={y1 + offsets[i].y}
+            x2={x2 + offsets[i].x}
+            y2={y2 + offsets[i].y}
+            strokeWidth={widths[i]}
+            stroke="#000"
+          />
+        ))}
     </g>
   );
 }
@@ -337,11 +350,25 @@ function addBridgeByVector(
       break;
     }
     if (matrix[x][y].bridge) {
-      break;
+      const { bridge } = matrix[x][y];
+      if (
+        dragVector.x !== 0 &&
+        (bridge == SolutionFieldBridge.SingleVertical ||
+          bridge == SolutionFieldBridge.DoubleVertical)
+      ) {
+        break;
+      }
+      if (
+        dragVector.y !== 0 &&
+        (bridge == SolutionFieldBridge.SingleHorizontal ||
+          bridge == SolutionFieldBridge.DoubleHorizontal)
+      ) {
+        break;
+      }
     }
     const index = matrix[x][y].index;
     if (index !== null) {
-      addBridge(solution, dragOrigin, index);
+      addHighlight(solution, dragOrigin, index);
       break;
     }
   }

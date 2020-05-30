@@ -171,7 +171,16 @@ export function addBridge(solution: Solution, from: number, to: number) {
     from,
     to,
     value: 1,
-    emphasis: 1,
+  });
+}
+
+export function addHighlight(solution: Solution, from: number, to: number) {
+  [from, to] = max2(from, to);
+  solution.bridges.unshift({
+    from,
+    to,
+    value: 0,
+    highlight: true,
   });
 }
 

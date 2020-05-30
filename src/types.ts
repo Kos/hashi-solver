@@ -75,7 +75,8 @@ interface Bridge {
   readonly from: number;
   readonly to: number; // > from
   readonly value: number; // 1 or 2
-  readonly emphasis: number; // 0 or 1 or 2, to mark most recent move for display
+  readonly emphasis?: number; // 0 or 1 or 2, to mark most recent move for display
+  readonly highlight?: boolean; // true or f alse, to mark where next move would happen
 }
 
 export enum SolutionFieldBridge {
