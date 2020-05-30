@@ -125,52 +125,71 @@ function MySvg({ puzzle, solution }: { puzzle: Puzzle; solution: Solution }) {
   const height = puzzle.height * scale;
   const place = (x: number) => x * scale + offset;
 
-  const dragPos = React.useRef<null | { x: number; y: number }>(null);
-  const [dragOrigin, setDragOrigin] = React.useState<null | number>(null);
-  const [dragVector, setDragVector] = React.useState<null | {
-    x: number;
-    y: number;
+  const dragOriginPositionRef = React.useRef<null | { x: number; y: number }>(
+    null
+  );
+  const dragOriginIndexRef = React.useRef<null | number>(null);
+  const [highlightedBridge, setHighlightedBridge] = React.useState<null | {
+    from: number;
+    to: number;
   }>(null);
+
   const handleIslandMouseDown = (event) => {
     const islandIndex = +event.currentTarget.dataset.index;
     const rect = event.currentTarget.getBoundingClientRect();
-    dragPos.current = {
+    dragOriginPositionRef.current = {
       x: (rect.right + rect.left) / 2,
       y: (rect.bottom + rect.top) / 2,
     };
-    setDragOrigin(islandIndex);
+    dragOriginIndexRef.current = islandIndex;
   };
   const handleMouseUp = (event) => {
-    dragPos.current = null;
-    setDragVector(null);
-    setDragOrigin(null);
+    dragOriginPositionRef.current = null;
+    dragOriginIndexRef.current = null;
+    setHighlightedBridge(null);
   };
   const handleMouseMove = (event) => {
-    if (dragPos.current === null) {
+    if (
+      dragOriginPositionRef.current === null ||
+      dragOriginIndexRef.current === null
+    ) {
       return;
     }
     const nx = event.pageX;
     const ny = event.pageY;
-    const { x, y } = dragPos.current;
+    const { x, y } = dragOriginPositionRef.current;
     const dx = nx - x;
     const dy = ny - y;
     if (dy == dx) return;
+    let dragVector: { x: number; y: number };
     if (Math.abs(dx) > Math.abs(dy)) {
-      setDragVector({
+      dragVector = {
         x: Math.sign(dx),
         y: 0,
-      });
+      };
     } else {
-      setDragVector({
+      dragVector = {
         x: 0,
         y: Math.sign(dy),
-      });
+      };
+    }
+
+    const target = getDragDropTarget(
+      puzzle,
+      solution,
+      dragOriginIndexRef.current,
+      dragVector
+    );
+    if (target !== null) {
+      setHighlightedBridge({ from: dragOriginIndexRef.current, to: target });
+    } else {
+      setHighlightedBridge(null);
     }
   };
 
-  if (dragOrigin && dragVector) {
+  if (highlightedBridge) {
     solution = solution.clone();
-    addBridgeByVector(puzzle, solution, dragOrigin, dragVector);
+    addHighlight(solution, highlightedBridge.from, highlightedBridge.to);
   }
 
   const islandValues = puzzle.islands.map((x) => 0);
@@ -331,23 +350,23 @@ const div = document.createElement("div");
 document.body.appendChild(div);
 ReactDOM.render(<MyElem />, div);
 
-function addBridgeByVector(
+function getDragDropTarget(
   puzzle: Puzzle,
   solution: Solution,
   dragOrigin: number,
   dragVector: { x: number; y: number }
-) {
+): number | null {
   const [matrix, err] = solution.toMatrix(puzzle);
   if (!matrix) {
-    console.error("addBridgeByVector", err);
-    return;
+    console.error("getDragDropTarget", err);
+    return null;
   }
   let { x, y } = puzzle.islands[dragOrigin];
   while (true) {
     x += dragVector.x;
     y += dragVector.y;
     if (x < 0 || x >= puzzle.width || y < 0 || y >= puzzle.height) {
-      break;
+      return null;
     }
     if (matrix[x][y].bridge) {
       const { bridge } = matrix[x][y];
@@ -356,20 +375,19 @@ function addBridgeByVector(
         (bridge == SolutionFieldBridge.SingleVertical ||
           bridge == SolutionFieldBridge.DoubleVertical)
       ) {
-        break;
+        return null;
       }
       if (
         dragVector.y !== 0 &&
         (bridge == SolutionFieldBridge.SingleHorizontal ||
           bridge == SolutionFieldBridge.DoubleHorizontal)
       ) {
-        break;
+        return null;
       }
     }
     const index = matrix[x][y].index;
     if (index !== null) {
-      addHighlight(solution, dragOrigin, index);
-      break;
+      return index;
     }
   }
 }
