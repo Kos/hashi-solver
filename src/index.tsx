@@ -11,6 +11,7 @@ import "semantic-ui-css/semantic.min.css";
 interface PuzzleController {
   puzzle: Puzzle;
   solutionStack: { solution: Solution; comment: string; manual?: boolean }[];
+  redoStack: { solution: Solution; comment: string; manual?: boolean }[];
   solution: Solution;
   options: DropdownItemProps[];
 
@@ -18,6 +19,7 @@ interface PuzzleController {
   solve: () => void;
   solveStep: () => void;
   undo: () => void;
+  redo: () => void;
   reset: () => void;
   toggleBridge: (from: number, to: number) => void;
 }
@@ -31,9 +33,10 @@ function usePuzzleController(): PuzzleController {
     return {
       puzzle,
       solutionStack,
+      redoStack: [],
     };
   });
-  const { puzzle, solutionStack } = state;
+  const { puzzle, solutionStack, redoStack } = state;
   const solution = solutionStack[solutionStack.length - 1].solution;
 
   const updateState = (up) =>
@@ -49,6 +52,7 @@ function usePuzzleController(): PuzzleController {
     puzzle,
     solution,
     solutionStack,
+    redoStack,
     options,
 
     loadSolution(index: number) {
@@ -57,6 +61,7 @@ function usePuzzleController(): PuzzleController {
         solutionStack: [
           { solution: new Solution([]), comment: "The beginning" },
         ],
+        redoStack: [],
       });
     },
 
@@ -76,6 +81,7 @@ function usePuzzleController(): PuzzleController {
       }
       updateState({
         solutionStack: [...newStack],
+        redoStack: [],
       });
     },
 
@@ -90,6 +96,7 @@ function usePuzzleController(): PuzzleController {
           ...solutionStack,
           { solution: result.solution, comment: result.tactic?.label },
         ],
+        redoStack: [],
       });
     },
 
@@ -99,12 +106,24 @@ function usePuzzleController(): PuzzleController {
       }
       updateState({
         solutionStack: solutionStack.slice(0, solutionStack.length - 1),
+        redoStack: [solutionStack[solutionStack.length - 1], ...redoStack],
+      });
+    },
+
+    redo() {
+      if (redoStack.length == 0) {
+        return;
+      }
+      updateState({
+        solutionStack: [...solutionStack, redoStack[0]],
+        redoStack: redoStack.slice(1),
       });
     },
 
     reset() {
       updateState({
         solutionStack: [solutionStack[0]],
+        redoStack: [],
       });
     },
 
@@ -116,6 +135,7 @@ function usePuzzleController(): PuzzleController {
           ...solutionStack,
           { solution: newSolution, comment: "Manual step", manual: true },
         ],
+        redoStack: [],
       });
     },
   };
@@ -123,7 +143,14 @@ function usePuzzleController(): PuzzleController {
 
 function MyElem() {
   const controller = usePuzzleController();
-  const { puzzle, solution, solutionStack, options, toggleBridge } = controller;
+  const {
+    puzzle,
+    solution,
+    solutionStack,
+    redoStack,
+    options,
+    toggleBridge,
+  } = controller;
   const onChangePuzzleDropdown = function (event, data) {
     controller.loadSolution(data.value);
   };
@@ -150,6 +177,7 @@ function MyElem() {
         <div>
           <Button onClick={controller.reset}>Reset</Button>
           <Button onClick={controller.undo}>Undo</Button>
+          <Button onClick={controller.redo}>Redo</Button>
           <Button onClick={controller.solve}>Solve</Button>
           <Button onClick={controller.solveStep}>Solve step</Button>
         </div>
@@ -168,7 +196,18 @@ function MyElem() {
                 verticalAlign="middle"
               />
               <List.Content>
-                {/* <List.Header>{x.comment}</List.Header> */}
+                <List.Description>{x.comment}</List.Description>
+              </List.Content>
+            </List.Item>
+          ))}
+          {redoStack.map((x, n) => (
+            <List.Item key={n} style={{ opacity: 0.5 }}>
+              <List.Icon
+                name={x.manual ? "arrow right" : "lightbulb outline"}
+                size="large"
+                verticalAlign="middle"
+              />
+              <List.Content>
                 <List.Description>{x.comment}</List.Description>
               </List.Content>
             </List.Item>
