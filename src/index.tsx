@@ -10,7 +10,7 @@ import "semantic-ui-css/semantic.min.css";
 
 interface PuzzleController {
   puzzle: Puzzle;
-  solutionStack: Solution[];
+  solutionStack: { solution: Solution; comment: string }[];
   solution: Solution;
   options: DropdownItemProps[];
 
@@ -25,14 +25,16 @@ interface PuzzleController {
 function usePuzzleController(): PuzzleController {
   const [state, setState] = React.useState(() => {
     const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
-    const solutionStack = [new Solution([])];
+    const solutionStack = [
+      { solution: new Solution([]), comment: "The beginning" },
+    ];
     return {
       puzzle,
       solutionStack,
     };
   });
   const { puzzle, solutionStack } = state;
-  const solution = solutionStack[solutionStack.length - 1];
+  const solution = solutionStack[solutionStack.length - 1].solution;
 
   const updateState = (up) =>
     setState((prevState) => ({ ...prevState, ...up }));
@@ -52,21 +54,42 @@ function usePuzzleController(): PuzzleController {
     loadSolution(index: number) {
       setState({
         puzzle: Puzzle.fromObject(easyStarters.puzzles[index]),
-        solutionStack: [new Solution([])],
+        solutionStack: [
+          { solution: new Solution([]), comment: "The beginning" },
+        ],
       });
     },
 
     solve() {
-      const newSolution = solveFrom(puzzle, solution);
+      const newStack = solutionStack.slice();
+      let currentSolution = solution;
+      for (;;) {
+        let result = solveStep(puzzle, currentSolution);
+        if (!result) {
+          break;
+        }
+        currentSolution = result.solution;
+        newStack.push({
+          solution: currentSolution,
+          comment: result.tactic?.label || "",
+        });
+      }
       updateState({
-        solutionStack: [...solutionStack, newSolution],
+        solutionStack: [...solutionStack, ...newStack],
       });
     },
 
     solveStep() {
-      const [newSolution, result] = solveStep(puzzle, solution);
+      console.log("solveStep");
+      const result = solveStep(puzzle, solution);
+      if (!result) {
+        return;
+      }
       updateState({
-        solutionStack: [...solutionStack, newSolution],
+        solutionStack: [
+          ...solutionStack,
+          { solution: result.solution, comment: result.tactic?.label },
+        ],
       });
     },
 
@@ -81,7 +104,7 @@ function usePuzzleController(): PuzzleController {
 
     reset() {
       updateState({
-        solutionStack: [new Solution([])],
+        solutionStack: [solutionStack[0]],
       });
     },
 
@@ -89,7 +112,10 @@ function usePuzzleController(): PuzzleController {
       const newSolution = solution.clone();
       toggleBridge(newSolution, from, to);
       updateState({
-        solutionStack: [...solutionStack, newSolution],
+        solutionStack: [
+          ...solutionStack,
+          { solution: newSolution, comment: "" },
+        ],
       });
     },
   };
