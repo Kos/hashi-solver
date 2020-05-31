@@ -5,12 +5,12 @@ import * as easyStarters from "../puzzles/ConceptisEasy.json";
 import { Puzzle, Solution, SolutionFieldBridge } from "./types";
 import { solveFrom, solveStep } from "./solver";
 import { toggleBridge, addHighlight } from "./solutionEditor";
-import { Button, Dropdown, DropdownItemProps } from "semantic-ui-react";
+import { Button, Dropdown, DropdownItemProps, List } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 
 interface PuzzleController {
   puzzle: Puzzle;
-  solutionStack: { solution: Solution; comment: string }[];
+  solutionStack: { solution: Solution; comment: string; manual?: boolean }[];
   solution: Solution;
   options: DropdownItemProps[];
 
@@ -75,7 +75,7 @@ function usePuzzleController(): PuzzleController {
         });
       }
       updateState({
-        solutionStack: [...solutionStack, ...newStack],
+        solutionStack: [...newStack],
       });
     },
 
@@ -114,7 +114,7 @@ function usePuzzleController(): PuzzleController {
       updateState({
         solutionStack: [
           ...solutionStack,
-          { solution: newSolution, comment: "" },
+          { solution: newSolution, comment: "Manual step", manual: true },
         ],
       });
     },
@@ -123,7 +123,7 @@ function usePuzzleController(): PuzzleController {
 
 function MyElem() {
   const controller = usePuzzleController();
-  const { puzzle, solution, options, toggleBridge } = controller;
+  const { puzzle, solution, solutionStack, options, toggleBridge } = controller;
   const onChangePuzzleDropdown = function (event, data) {
     controller.loadSolution(data.value);
   };
@@ -153,6 +153,27 @@ function MyElem() {
           <Button onClick={controller.solve}>Solve</Button>
           <Button onClick={controller.solveStep}>Solve step</Button>
         </div>
+        <List divided relaxed>
+          {solutionStack.map((x, n) => (
+            <List.Item key={n}>
+              <List.Icon
+                name={
+                  n == 0
+                    ? "star outline"
+                    : x.manual
+                    ? "arrow right"
+                    : "lightbulb outline"
+                }
+                size="large"
+                verticalAlign="middle"
+              />
+              <List.Content>
+                {/* <List.Header>{x.comment}</List.Header> */}
+                <List.Description>{x.comment}</List.Description>
+              </List.Content>
+            </List.Item>
+          ))}
+        </List>
       </Panel>
     </Container>
   );
