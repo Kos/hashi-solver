@@ -224,6 +224,32 @@ const tactics: Tactic[] = [
       if (context.metas[meta.neighbours[1]].desiredValue <= 2) {
         return editor.ensureOneBridge(solution, meta.index, meta.neighbours[0]);
       }
+      return false;
+    },
+  },
+
+  {
+    label:
+      "A node that has two open neighbours remaining and at least two bridges to assign, must assign one bridge to neighbour B if neighbour A could only accept one",
+
+    isApplicable({ meta }) {
+      return (
+        meta.activeNeighbours.length == 2 &&
+        meta.desiredValue - meta.currentValue > 1
+      );
+    },
+
+    apply({ meta, solution, context }) {
+      const nbs = meta.activeNeighbours.map((id) => context.metas[id]);
+      if (nbs[0].desiredValue - nbs[0].currentValue == 1) {
+        editor.addBridge(solution, meta.index, nbs[1].index);
+        return true;
+      }
+      if (nbs[1].desiredValue - nbs[1].currentValue == 1) {
+        editor.addBridge(solution, meta.index, nbs[0].index);
+        return true;
+      }
+      return false;
     },
   },
 
@@ -234,7 +260,7 @@ const tactics: Tactic[] = [
       return false;
     },
 
-    apply() {
+    apply({ meta, solution, context }) {
       return false;
     },
   },

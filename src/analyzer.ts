@@ -102,11 +102,15 @@ function saveActiveNeighbours(
     metas[a].neighbours.push(b);
     metas[b].neighbours.push(a);
 
-    if (metas[b].currentValue < metas[b].desiredValue) {
-      metas[a].activeNeighbours.push(b);
-    }
-    if (metas[a].currentValue < metas[a].desiredValue) {
-      metas[b].activeNeighbours.push(a);
+    if (
+      !metas[a].bridges.some((bridge) => bridge.to == b && bridge.value == 2)
+    ) {
+      if (metas[b].currentValue < metas[b].desiredValue) {
+        metas[a].activeNeighbours.push(b);
+      }
+      if (metas[a].currentValue < metas[a].desiredValue) {
+        metas[b].activeNeighbours.push(a);
+      }
     }
   });
 }
