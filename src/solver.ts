@@ -182,6 +182,52 @@ const tactics: Tactic[] = [
   },
 
   {
+    label:
+      "A '3' that has three neighbours, where two of them are '1' and '2', should have at least one bridge to the third one.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 3 && meta.desiredValue == 3;
+    },
+
+    apply({ context, meta, solution }) {
+      const nonOneIndices: number[] = [];
+      for (let i = 0; i < meta.neighbours.length; ++i) {
+        const nbIndex = meta.neighbours[i];
+        if (context.metas[nbIndex].desiredValue != 1) {
+          nonOneIndices.push(nbIndex);
+        }
+      }
+      if (nonOneIndices.length != 2) {
+        return false;
+      }
+      return [
+        context.metas[nonOneIndices[0]].desiredValue == 2 &&
+          editor.ensureOneBridge(solution, meta.index, nonOneIndices[1]),
+        context.metas[nonOneIndices[1]].desiredValue == 2 &&
+          editor.ensureOneBridge(solution, meta.index, nonOneIndices[0]),
+      ].some(id);
+    },
+  },
+
+  {
+    label:
+      "A '2' that has a neighbour '1' or '2' needs one bridge to another neighbour.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 2 && meta.desiredValue == 2;
+    },
+
+    apply({ meta, solution, context }) {
+      if (context.metas[meta.neighbours[0]].desiredValue <= 2) {
+        return editor.ensureOneBridge(solution, meta.index, meta.neighbours[1]);
+      }
+      if (context.metas[meta.neighbours[1]].desiredValue <= 2) {
+        return editor.ensureOneBridge(solution, meta.index, meta.neighbours[0]);
+      }
+    },
+  },
+
+  {
     label: "STUB",
 
     isApplicable({ meta }) {

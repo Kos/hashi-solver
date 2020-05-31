@@ -23,6 +23,6 @@ function checkCollection(collection, expectedCount) {
 }
 
 describe("solver", () => {
-  it("should solve some easy puzzles", () => checkCollection(easy, 16));
+  it("should solve some easy puzzles", () => checkCollection(easy, 24));
   it("should solve some medium puzzles", () => checkCollection(medium, 0));
 });
