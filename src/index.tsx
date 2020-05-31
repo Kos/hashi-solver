@@ -3,7 +3,8 @@ import * as ReactDOM from "react-dom";
 
 import * as easyStarters from "../puzzles/ConceptisEasy.json";
 import { Puzzle, Solution, SolutionFieldBridge } from "./types";
-import { solveFrom, solveStep, toggleBridge, addHighlight } from "./solver";
+import { solveFrom, solveStep } from "./solver";
+import { toggleBridge, addHighlight } from "./solutionEditor";
 import { Button, Dropdown, DropdownItemProps } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 

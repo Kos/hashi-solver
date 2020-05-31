@@ -1,5 +1,6 @@
 import { Puzzle, Solution } from "./types";
-import { analyze } from "./analyzer";
+import { analyze, SolutionContext, IslandMeta } from "./analyzer";
+import * as editor from "./solutionEditor";
 
 export function solve(puzzle: Puzzle): Solution {
   let solution = new Solution([]);
@@ -16,204 +17,164 @@ export function solveFrom(puzzle: Puzzle, solution: Solution) {
   }
 }
 
+interface TacticQuery {
+  puzzle: Puzzle;
+  solution: Solution;
+  context: SolutionContext;
+  index: number;
+  meta: IslandMeta;
+}
+
+interface Tactic {
+  label: string;
+
+  isApplicable(params: TacticQuery): boolean;
+
+  apply(params: TacticQuery): boolean; // TODO rewrite existing tactics so that they don't depend on apply returning a boolean...
+}
+
+const id = (x) => x;
+
+const tactics: Tactic[] = [
+  // --------------
+  // Basic tactics
+  // --------------
+  {
+    label: "Add remaining bridges for a node with one active neighbour",
+
+    isApplicable({ context, index }) {
+      const meta = context.metas[index];
+      return (
+        meta.activeNeighbours.length === 1 &&
+        meta.desiredValue != meta.currentValue
+      );
+    },
+
+    apply({ solution, meta }) {
+      for (let i = 0; i < meta.desiredValue - meta.currentValue; ++i) {
+        editor.addBridge(solution, meta.index, meta.activeNeighbours[0]);
+      }
+      return true;
+    },
+  },
+
+  {
+    label: "A '3' with two neighbours must have at least one bridge to each.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 2 && meta.desiredValue == 3;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+      ].some(id);
+    },
+  },
+
+  {
+    label: "A '5' with three neighbours must have at least one bridge to each.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 3 && meta.desiredValue == 5;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[2]),
+      ].some(id);
+    },
+  },
+
+  {
+    label: "A '6' with three neighbours must have two bridges to each.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 3 && meta.desiredValue == 6;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[0]),
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[2]),
+      ].some(id);
+    },
+  },
+
+  {
+    label: "A '7' with four neighbours must have at least one bridge to each.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 4 && meta.desiredValue == 7;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[2]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[3]),
+      ].some(id);
+    },
+  },
+
+  {
+    label: "An '8' with four neighbours must have two bridges to each.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 4 && meta.desiredValue == 8;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[0]),
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[2]),
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[3]),
+      ].some(id);
+    },
+  },
+
+  {
+    label: "STUB",
+
+    isApplicable({ meta }) {
+      return false;
+    },
+
+    apply() {
+      return false;
+    },
+  },
+];
+
 export function solveStep(
   puzzle: Puzzle,
   solution: Solution
 ): [Solution, boolean] {
   solution = solution.clone();
-  const { metas } = analyze(puzzle, solution);
+  const context = analyze(puzzle, solution);
+  const { metas } = context;
 
-  for (let meta of metas) {
-    if (
-      meta.activeNeighbours.length == 1 &&
-      meta.desiredValue != meta.currentValue
-    ) {
-      for (let i = 0; i < meta.desiredValue - meta.currentValue; ++i) {
-        addBridge(solution, meta.index, meta.activeNeighbours[0]);
-      }
-      return [solution, true];
-    }
-
-    if (meta.neighbours.length == 2 && meta.desiredValue == 3) {
-      const added = [
-        ensureOneBridge(solution, meta.index, meta.neighbours[0]),
-        ensureOneBridge(solution, meta.index, meta.neighbours[1]),
-      ].some((x) => x);
-      if (added) {
-        return [solution, true];
-      }
-    }
-
-    if (meta.neighbours.length == 3 && meta.desiredValue == 5) {
-      const added = [
-        ensureOneBridge(solution, meta.index, meta.neighbours[0]),
-        ensureOneBridge(solution, meta.index, meta.neighbours[1]),
-        ensureOneBridge(solution, meta.index, meta.neighbours[2]),
-      ].some((x) => x);
-      if (added) {
-        return [solution, true];
-      }
-    }
-
-    if (meta.neighbours.length == 3 && meta.desiredValue == 6) {
-      const added = [
-        ensureTwoBridges(solution, meta.index, meta.neighbours[0]),
-        ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
-        ensureTwoBridges(solution, meta.index, meta.neighbours[2]),
-      ].some((x) => x);
-      if (added) {
-        return [solution, true];
-      }
-    }
-
-    if (meta.desiredValue == 7) {
-      const added = [
-        ensureOneBridge(solution, meta.index, meta.neighbours[0]),
-        ensureOneBridge(solution, meta.index, meta.neighbours[1]),
-        ensureOneBridge(solution, meta.index, meta.neighbours[2]),
-        ensureOneBridge(solution, meta.index, meta.neighbours[3]),
-      ].some((x) => x);
-      if (added) {
-        return [solution, true];
-      }
-    }
-
-    if (meta.desiredValue == 8) {
-      const added = [
-        ensureTwoBridges(solution, meta.index, meta.neighbours[0]),
-        ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
-        ensureTwoBridges(solution, meta.index, meta.neighbours[2]),
-        ensureTwoBridges(solution, meta.index, meta.neighbours[3]),
-      ].some((x) => x);
-      if (added) {
-        return [solution, true];
+  for (let tactic of tactics) {
+    for (let index = 0; index < puzzle.islands.length; ++index) {
+      const query: TacticQuery = {
+        context,
+        puzzle,
+        solution,
+        index,
+        meta: metas[index],
+      };
+      if (tactic.isApplicable(query)) {
+        if (tactic.apply(query)) {
+          return [solution, true];
+        }
       }
     }
   }
   return [solution, false];
-}
-
-function ensureOneBridge(
-  solution: Solution,
-  from: number,
-  to: number
-): boolean {
-  [from, to] = max2(from, to);
-
-  for (let i = 0; i < solution.bridges.length; ++i) {
-    const bridge = solution.bridges[i];
-    if (bridge.from == from && bridge.to == to) {
-      return false;
-    }
-  }
-  // not found - add
-  solution.bridges.push({
-    from,
-    to,
-    value: 1,
-    emphasis: 1,
-  });
-  return true;
-}
-
-function ensureTwoBridges(
-  solution: Solution,
-  from: number,
-  to: number
-): boolean {
-  [from, to] = max2(from, to);
-  for (let i = 0; i < solution.bridges.length; ++i) {
-    const bridge = solution.bridges[i];
-    if (bridge.from == from && bridge.to == to) {
-      if (bridge.value == 1) {
-        solution.bridges[i] = {
-          from,
-          to,
-          value: 2,
-          emphasis: 1,
-        };
-        return true;
-      }
-      if (bridge.value == 2) {
-        return false;
-      }
-    }
-  }
-  solution.bridges.push({
-    from,
-    to,
-    value: 2,
-    emphasis: 2,
-  });
-  return true;
-}
-
-export function addBridge(solution: Solution, from: number, to: number) {
-  [from, to] = max2(from, to);
-  for (let i = 0; i < solution.bridges.length; ++i) {
-    const bridge = solution.bridges[i];
-    if (bridge.from == from && bridge.to == to) {
-      if (bridge.value == 1) {
-        solution.bridges[i] = {
-          from,
-          to,
-          value: 2,
-          emphasis: 1,
-        };
-        return;
-      }
-      if (bridge.value == 2) {
-        throw new Error("Tried to add a third bridge");
-      }
-    }
-  }
-  solution.bridges.push({
-    from,
-    to,
-    value: 1,
-    emphasis: 1,
-  });
-}
-
-export function addHighlight(solution: Solution, from: number, to: number) {
-  [from, to] = max2(from, to);
-  solution.bridges.unshift({
-    from,
-    to,
-    value: 0,
-    highlight: true,
-  });
-}
-
-export function toggleBridge(solution: Solution, from: number, to: number) {
-  [from, to] = max2(from, to);
-  // TODO analyze, prevent adding bridges over limit.. Or we could stash that in isLegal instead
-  for (let i = 0; i < solution.bridges.length; ++i) {
-    const bridge = solution.bridges[i];
-    if (bridge.from == from && bridge.to == to) {
-      if (bridge.value == 1) {
-        solution.bridges[i] = {
-          from,
-          to,
-          value: 2,
-          emphasis: 1,
-        };
-        return;
-      }
-      if (bridge.value == 2) {
-        solution.bridges.splice(i, 1);
-        return;
-      }
-    }
-  }
-  solution.bridges.push({
-    from,
-    to,
-    value: 1,
-    emphasis: 1,
-  });
-}
-
-function max2(a, b) {
-  return a < b ? [a, b] : [b, a];
 }

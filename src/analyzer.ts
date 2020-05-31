@@ -5,7 +5,7 @@ that will be used as the input of the Solver.
 
 import { Puzzle, Solution, SolutionField, SolutionFieldBridge } from "./types";
 
-interface IslandMeta {
+export interface IslandMeta {
   index: number; // index in Puzzle
   currentValue: number; // current total value of bridges
   desiredValue: number; // desired total value of bridges
