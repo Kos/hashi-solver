@@ -216,8 +216,15 @@ export class Solution {
     return s;
   }
 
-  // isCorrect(p: Puzzle) {} // TODO
+  isCorrect(p: Puzzle): boolean {
+    if (!this.isLegal(p)) {
+      return false;
+    }
+    const values = p.islands.map((island) => island.value);
+    this.bridges.map((bridge) => {
+      values[bridge.from] -= bridge.value;
+      values[bridge.to] -= bridge.value;
+    });
+    return values.every((x) => x === 0);
+  }
 }
-
-// console.log("isLegal", solution.isLegal(puzzle));
-// console.log(solution.toString(puzzle));
