@@ -6,7 +6,7 @@ import * as medium from "../puzzles/ConceptisMedium.json";
 // import * as hard from "../puzzles/ConceptisEasy.json";
 
 function checkCollection(collection, expectedCount) {
-  const results = collection.puzzles.map((data) => {
+  const results = collection.puzzles.map((data, index) => {
     const puzzle = Puzzle.fromObject(data);
     const solution = solve(puzzle);
     return solution.isCorrect(puzzle);
@@ -23,6 +23,6 @@ function checkCollection(collection, expectedCount) {
 }
 
 describe("solver", () => {
-  it("should solve some easy puzzles", () => checkCollection(easy, 6));
+  it("should solve some easy puzzles", () => checkCollection(easy, 16));
   it("should solve some medium puzzles", () => checkCollection(medium, 0));
 });

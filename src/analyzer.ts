@@ -11,7 +11,7 @@ export interface IslandMeta {
   desiredValue: number; // desired total value of bridges
   neighbours: number[]; // indices of islands reachable using a bridge, without crossing but disregarding for island values
   activeNeighbours: number[]; // indices of islands we could legally add a bridge (regarding neighbour values and two bridges rule)
-  bridges: Set<number>; // indices of islands we are currently connected to (where at least one bridge exists).
+  bridges: { to: number; value: number }[]; // indices of islands we are currently connected to, and values of such bridges
 }
 
 export interface SolutionContext {
@@ -30,7 +30,7 @@ export function analyze(puzzle: Puzzle, solution: Solution): SolutionContext {
     desiredValue: island.value,
     neighbours: [],
     activeNeighbours: [],
-    bridges: new Set(),
+    bridges: [],
   }));
 
   saveBridges(solution, metas);
@@ -113,9 +113,9 @@ function saveActiveNeighbours(
 
 function saveBridges(solution: Solution, metas: IslandMeta[]) {
   solution.bridges.forEach((bridge) => {
-    metas[bridge.from].bridges.add(bridge.to);
+    metas[bridge.from].bridges.push({ to: bridge.to, value: bridge.value });
     metas[bridge.from].currentValue += bridge.value;
-    metas[bridge.to].bridges.add(bridge.from);
+    metas[bridge.to].bridges.push({ to: bridge.from, value: bridge.value });
     metas[bridge.to].currentValue += bridge.value;
   });
 }

@@ -74,6 +74,21 @@ const tactics: Tactic[] = [
   },
 
   {
+    label: "A '4' with two neighbours must have two bridges to each.",
+
+    isApplicable({ meta }) {
+      return meta.neighbours.length == 2 && meta.desiredValue == 4;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[0]),
+        editor.ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
+      ].some(id);
+    },
+  },
+
+  {
     label: "A '5' with three neighbours must have at least one bridge to each.",
 
     isApplicable({ meta }) {
@@ -135,6 +150,33 @@ const tactics: Tactic[] = [
         editor.ensureTwoBridges(solution, meta.index, meta.neighbours[1]),
         editor.ensureTwoBridges(solution, meta.index, meta.neighbours[2]),
         editor.ensureTwoBridges(solution, meta.index, meta.neighbours[3]),
+      ].some(id);
+    },
+  },
+
+  {
+    label:
+      "A '4' with three neighbours that has exactly one bridge in a direction must have at least one bridge in two remaining directions.",
+
+    isApplicable({ context, meta }) {
+      if (meta.neighbours.length == 3 && meta.desiredValue == 4) {
+        for (let i = 0; i < meta.bridges.length; ++i) {
+          if (meta.bridges[i].value == 1) {
+            const neighbourMeta = context.metas[meta.bridges[i].to];
+            if (neighbourMeta.currentValue == neighbourMeta.desiredValue) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[2]),
       ].some(id);
     },
   },
