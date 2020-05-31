@@ -10,12 +10,14 @@ import "semantic-ui-css/semantic.min.css";
 
 interface PuzzleController {
   puzzle: Puzzle;
+  solutionStack: Solution[];
   solution: Solution;
   options: DropdownItemProps[];
 
   loadSolution: (solutionIndex: number) => void;
   solve: () => void;
   solveStep: () => void;
+  undo: () => void;
   reset: () => void;
   toggleBridge: (from: number, to: number) => void;
 }
@@ -23,19 +25,17 @@ interface PuzzleController {
 function usePuzzleController(): PuzzleController {
   const [state, setState] = React.useState(() => {
     const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
-    const solution = new Solution([]);
+    const solutionStack = [new Solution([])];
     return {
       puzzle,
-      solution,
+      solutionStack,
     };
   });
-  const { puzzle, solution } = state;
+  const { puzzle, solutionStack } = state;
+  const solution = solutionStack[solutionStack.length - 1];
+
   const updateState = (up) =>
     setState((prevState) => ({ ...prevState, ...up }));
-
-  function clickHandler(val: number) {
-    console.log("!", val);
-  }
 
   const options = easyStarters.puzzles.map((puzzle, index) => ({
     key: index,
@@ -46,32 +46,42 @@ function usePuzzleController(): PuzzleController {
   return {
     puzzle,
     solution,
+    solutionStack,
     options,
 
     loadSolution(index: number) {
       setState({
         puzzle: Puzzle.fromObject(easyStarters.puzzles[index]),
-        solution: new Solution([]),
+        solutionStack: [new Solution([])],
       });
     },
 
     solve() {
       const newSolution = solveFrom(puzzle, solution);
       updateState({
-        solution: newSolution,
+        solutionStack: [...solutionStack, newSolution],
       });
     },
 
     solveStep() {
       const [newSolution, result] = solveStep(puzzle, solution);
       updateState({
-        solution: newSolution,
+        solutionStack: [...solutionStack, newSolution],
+      });
+    },
+
+    undo() {
+      if (solutionStack.length <= 1) {
+        return;
+      }
+      updateState({
+        solutionStack: solutionStack.slice(0, solutionStack.length - 1),
       });
     },
 
     reset() {
       updateState({
-        solution: new Solution([]),
+        solutionStack: [new Solution([])],
       });
     },
 
@@ -79,7 +89,7 @@ function usePuzzleController(): PuzzleController {
       const newSolution = solution.clone();
       toggleBridge(newSolution, from, to);
       updateState({
-        solution: newSolution,
+        solutionStack: [...solutionStack, newSolution],
       });
     },
   };
@@ -113,6 +123,7 @@ function MyElem() {
         </div>
         <div>
           <Button onClick={controller.reset}>Reset</Button>
+          <Button onClick={controller.undo}>Undo</Button>
           <Button onClick={controller.solve}>Solve</Button>
           <Button onClick={controller.solveStep}>Solve step</Button>
         </div>
@@ -168,7 +179,6 @@ function MySvg({
   const handleMouseUp = (event) => {
     if (highlightedBridge !== null) {
       const { from, to } = highlightedBridge;
-      console.log("onToggleBridge", from, to);
       onToggleBridge(from, to);
     }
     dragOriginPositionRef.current = null;
