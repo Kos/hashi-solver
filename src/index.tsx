@@ -162,7 +162,7 @@ function MyElem() {
         onToggleBridge={toggleBridge}
       />
       <Panel>
-        <h2>Select level</h2>
+        <h2>Select puzzle</h2>
         <div>
           <Dropdown
             fluid
@@ -174,6 +174,17 @@ function MyElem() {
             defaultValue={0}
           />
         </div>
+        <p>
+          Puzzles courtesy of{" "}
+          <a
+            href="https://www.conceptispuzzles.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Conceptis Puzzles
+          </a>
+          .
+        </p>
         <div>
           <Button onClick={controller.reset}>Reset</Button>
           <Button onClick={controller.undo}>Undo</Button>
