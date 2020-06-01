@@ -25,7 +25,7 @@ export const tactics: Tactic[] = [
   // Basic tactics
   // --------------
   {
-    label: "Add remaining bridges for a node with one active neighbour",
+    label: "An island with one remaining neighbour must connect to it.",
 
     isApplicable({ context, index }) {
       const meta = context.metas[index];
@@ -266,7 +266,7 @@ export const tactics: Tactic[] = [
 
   {
     label:
-      "A node that has two open neighbours remaining and at least two bridges to assign, must assign one bridge to neighbour B if neighbour A could only accept one",
+      "An island that has two open neighbours remaining and at least two bridges to assign, must assign one bridge to neighbour B if neighbour A could only accept one",
 
     isApplicable({ meta }) {
       return (
