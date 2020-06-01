@@ -13,7 +13,7 @@ interface PuzzleField {
   index: number | null;
 }
 
-interface PuzzleObject {
+export interface PuzzleObject {
   // JSON notation for easy input
   width: number;
   height: number;

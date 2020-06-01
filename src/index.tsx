@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import * as easyStarters from "../puzzles/ConceptisEasy.json";
 import { Puzzle, Solution, SolutionFieldBridge } from "./types";
-import { solveFrom, solveStep } from "./solver";
+import { solveStep } from "./solver";
+import { library } from "./library";
 import { toggleBridge, addHighlight } from "./solutionEditor";
 import { Button, Dropdown, DropdownItemProps, List } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
@@ -26,7 +26,7 @@ interface PuzzleController {
 
 function usePuzzleController(): PuzzleController {
   const [state, setState] = React.useState(() => {
-    const puzzle = Puzzle.fromObject(easyStarters.puzzles[0]);
+    const puzzle = library[0].puzzle;
     const solutionStack = [
       { solution: new Solution([]), comment: "The beginning" },
     ];
@@ -42,10 +42,10 @@ function usePuzzleController(): PuzzleController {
   const updateState = (up) =>
     setState((prevState) => ({ ...prevState, ...up }));
 
-  const options = easyStarters.puzzles.map((puzzle, index) => ({
+  const options = library.map((entry, index) => ({
     key: index,
     value: index,
-    text: `${easyStarters.name} - ${index + 1}`,
+    text: entry.label,
   }));
 
   return {
@@ -57,7 +57,7 @@ function usePuzzleController(): PuzzleController {
 
     loadSolution(index: number) {
       setState({
-        puzzle: Puzzle.fromObject(easyStarters.puzzles[index]),
+        puzzle: Puzzle.fromObject(library[index].puzzle),
         solutionStack: [
           { solution: new Solution([]), comment: "The beginning" },
         ],
