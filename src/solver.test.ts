@@ -2,13 +2,19 @@ import { solve } from "./solver";
 import { Puzzle } from "./types";
 import * as easy from "../puzzles/ConceptisEasy.json";
 import * as medium from "../puzzles/ConceptisMedium.json";
-// import * as mediumPlus from "../puzzles/ConceptisMediumPlus.json";
+import * as mediumPlus from "../puzzles/ConceptisMediumPlus.json";
 // import * as hard from "../puzzles/ConceptisEasy.json";
 
 function checkCollection(collection, expectedCount) {
   const results = collection.puzzles.map((data, index) => {
     const puzzle = Puzzle.fromObject(data);
-    const solution = solve(puzzle);
+    try {
+      var solution = solve(puzzle);
+    } catch (e) {
+      throw new Error(
+        `Failed at puzzle ${collection.name} - ${index + 1}: ${e}`
+      );
+    }
     return solution.isCorrect(puzzle);
   });
   console.log(
@@ -23,6 +29,8 @@ function checkCollection(collection, expectedCount) {
 }
 
 describe("solver", () => {
-  it("should solve some easy puzzles", () => checkCollection(easy, 46));
-  it("should solve some medium puzzles", () => checkCollection(medium, 0));
+  it("should solve some easy puzzles", () => checkCollection(easy, 50));
+  it("should solve some medium puzzles", () => checkCollection(medium, 1));
+  it("should solve some mediumPlus puzzles", () =>
+    checkCollection(mediumPlus, 0));
 });

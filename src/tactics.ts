@@ -139,6 +139,10 @@ export const tactics: Tactic[] = [
     },
   },
 
+  // --------------
+  // 4-based tricks
+  // --------------
+
   {
     label:
       "A '4' with three neighbours that has exactly one bridge in a direction must have at least one bridge in two remaining directions.",
@@ -163,6 +167,53 @@ export const tactics: Tactic[] = [
         editor.ensureOneBridge(solution, meta.index, meta.neighbours[1]),
         editor.ensureOneBridge(solution, meta.index, meta.neighbours[2]),
       ].some(id);
+    },
+  },
+
+  {
+    label:
+      "A '4' with three neighbours that has a neighbour that can only accept 1 bridge must have at least one bridge in two remaining directions.",
+
+    isApplicable({ context, meta }) {
+      if (meta.neighbours.length == 3 && meta.desiredValue == 4) {
+        return true;
+      }
+      return false;
+    },
+
+    apply({ context, solution, meta }) {
+      for (let i = 0; i < 3; ++i) {
+        const n = context.metas[meta.neighbours[i]];
+        if (
+          n.desiredValue - n.currentValue == 1 &&
+          n.bridges.some((b) => b.to == meta.index) === false
+        ) {
+          return [
+            meta.neighbours[0] == n.index
+              ? false
+              : editor.ensureOneBridge(
+                  solution,
+                  meta.index,
+                  meta.neighbours[0]
+                ),
+            meta.neighbours[1] == n.index
+              ? false
+              : editor.ensureOneBridge(
+                  solution,
+                  meta.index,
+                  meta.neighbours[1]
+                ),
+            meta.neighbours[2] == n.index
+              ? false
+              : editor.ensureOneBridge(
+                  solution,
+                  meta.index,
+                  meta.neighbours[2]
+                ),
+          ].some(id);
+        }
+      }
+      return false;
     },
   },
 
