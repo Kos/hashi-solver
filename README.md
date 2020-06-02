@@ -9,3 +9,7 @@ Run:
 Test:
 
     npx jest
+
+See it live:
+
+    https://stuff.kos.gd/hashi-solver/
