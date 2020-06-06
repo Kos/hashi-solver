@@ -17,7 +17,7 @@ export function SolverUI() {
     toggleBridge,
   } = controller;
   const onChangePuzzleDropdown = function (event, data) {
-    controller.loadSolution(data.value);
+    controller.loadPuzzle(data.value);
   };
   return (
     <Container>
@@ -29,14 +29,17 @@ export function SolverUI() {
       <Panel>
         <h2>Select puzzle</h2>
         <div>
+          <Button onClick={controller.previousPuzzle}>Prev</Button>
+
           <Dropdown
             fluid
             search
             selection
             options={options}
             onChange={onChangePuzzleDropdown}
-            defaultValue={0}
+            value={controller.puzzleIndex}
           />
+          <Button onClick={controller.nextPuzzle}>Next</Button>
         </div>
         <p>
           Puzzles courtesy of{" "}

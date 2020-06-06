@@ -8,12 +8,15 @@ import { DropdownItemProps } from "semantic-ui-react";
 
 export interface PuzzleController {
   puzzle: Puzzle;
+  puzzleIndex: number;
   solutionStack: { solution: Solution; comment: string; manual?: boolean }[];
   redoStack: { solution: Solution; comment: string; manual?: boolean }[];
   solution: Solution;
   options: DropdownItemProps[];
 
-  loadSolution: (solutionIndex: number) => void;
+  loadPuzzle: (puzzleIndex: number) => void;
+  nextPuzzle: () => void;
+  previousPuzzle: () => void;
   solve: () => void;
   solveStep: () => void;
   undo: () => void;
@@ -30,13 +33,15 @@ export function usePuzzleController(): PuzzleController {
     ];
     return {
       puzzle,
+      puzzleIndex: 0,
       solutionStack,
       redoStack: [],
     };
   });
-  const { puzzle, solutionStack, redoStack } = state;
+  const { puzzle, puzzleIndex, solutionStack, redoStack } = state;
   const solution = solutionStack[solutionStack.length - 1].solution;
 
+  // TODO get rid of the below
   const updateState = (up) =>
     setState((prevState) => ({ ...prevState, ...up }));
 
@@ -46,21 +51,35 @@ export function usePuzzleController(): PuzzleController {
     text: entry.label,
   }));
 
-  return {
+  const controller = {
     puzzle,
+    puzzleIndex,
     solution,
     solutionStack,
     redoStack,
     options,
 
-    loadSolution(index: number) {
+    loadPuzzle(index: number) {
       setState({
         puzzle: Puzzle.fromObject(library[index].puzzle),
+        puzzleIndex: index,
         solutionStack: [
           { solution: new Solution([]), comment: "The beginning" },
         ],
         redoStack: [],
       });
+    },
+
+    nextPuzzle() {
+      if (puzzleIndex < options.length - 1) {
+        controller.loadPuzzle(puzzleIndex + 1);
+      }
+    },
+
+    previousPuzzle() {
+      if (puzzleIndex > 0) {
+        controller.loadPuzzle(puzzleIndex - 1);
+      }
     },
 
     solve() {
@@ -137,4 +156,5 @@ export function usePuzzleController(): PuzzleController {
       });
     },
   };
+  return controller;
 }
