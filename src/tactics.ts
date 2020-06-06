@@ -218,6 +218,54 @@ export const tactics: Tactic[] = [
   },
 
   {
+    label: "A '4' with three '2' neighbours needs at least one bridge to each.",
+
+    isApplicable({ context, meta }) {
+      if (
+        meta.neighbours.length == 3 &&
+        meta.desiredValue == 4 &&
+        meta.neighbours.every((n) => context.metas[n].desiredValue == 2)
+      ) {
+        return true;
+      }
+      return false;
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[0]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[1]),
+        editor.ensureOneBridge(solution, meta.index, meta.neighbours[2]),
+      ].some(id);
+    },
+  },
+
+  {
+    label:
+      "A '4' with two '2' neighbours needs at least one bridge to the other neighbour.",
+
+    isApplicable({ context, meta }) {
+      if (
+        meta.neighbours.length == 3 &&
+        meta.desiredValue == 4 &&
+        meta.neighbours.filter((n) => context.metas[n].desiredValue == 2)
+          .length == 2
+      ) {
+        return true;
+      }
+      return false;
+    },
+
+    apply({ solution, context, meta }) {
+      return editor.ensureOneBridge(
+        solution,
+        meta.index,
+        meta.neighbours.filter((x) => context.metas[x].desiredValue != 2)[0]
+      );
+    },
+  },
+
+  {
     label:
       "A '3' that has three neighbours, where two of them are '1' and '2', should have at least one bridge to the third one.",
 
