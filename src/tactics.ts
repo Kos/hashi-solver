@@ -314,7 +314,7 @@ export const tactics: Tactic[] = [
 
   {
     label:
-      "An island that has two open neighbours remaining and at least two bridges to assign, must assign one bridge to neighbour B if neighbour A could only accept one",
+      "An island that has two open neighbours remaining and at least two bridges to assign, must assign one bridge to neighbour B if neighbour A could only accept one.",
 
     isApplicable({ meta }) {
       return (
@@ -332,6 +332,39 @@ export const tactics: Tactic[] = [
       if (nbs[1].desiredValue - nbs[1].currentValue == 1) {
         editor.addBridge(solution, meta.index, nbs[0].index);
         return true;
+      }
+      return false;
+    },
+  },
+
+  // ----------------------
+  // Dragon-based reasoning
+  // ----------------------
+
+  {
+    label:
+      "If a group of islands only has two active islands left and connecting them would make a dead-end, one bridge has to be added elsewhere.",
+
+    isApplicable({ meta, context }) {
+      return (
+        context.dragons.length > 1 &&
+        meta.activeNeighbours.length == 2 &&
+        meta.remainingValue == 1 &&
+        context.dragons[meta.dragonIndex].heads == 2 &&
+        meta.activeNeighbours.some(
+          (nx) =>
+            context.metas[nx].dragonIndex == meta.dragonIndex &&
+            context.metas[nx].remainingValue == 1
+        )
+      );
+    },
+
+    apply({ meta, context, solution }) {
+      for (let nx of meta.activeNeighbours) {
+        if (context.metas[nx].dragonIndex != meta.dragonIndex) {
+          editor.addBridge(solution, meta.index, nx);
+          return true;
+        }
       }
       return false;
     },
