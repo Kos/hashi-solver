@@ -25,6 +25,7 @@ export function SolverUI() {
         puzzle={puzzle}
         solution={solution}
         onToggleBridge={toggleBridge}
+        widgetHeight={600}
       />
       <Panel>
         <h2>Select puzzle</h2>
@@ -100,26 +101,36 @@ function Container({ children }) {
   const style = {
     display: "flex",
   };
-  return <div style={style}>{children}</div>;
+  return (
+    <div className="container" style={style}>
+      {children}
+    </div>
+  );
 }
 
 function Panel({ children }) {
-  return <div>{children}</div>;
+  return <div className="panel">{children}</div>;
 }
+
+const ThemeContext = React.createContext({
+  scale: 20,
+});
 
 function MySvg({
   puzzle,
   solution,
   onToggleBridge,
+  widgetHeight,
 }: {
   puzzle: Puzzle;
   solution: Solution;
   onToggleBridge: (from: number, to: number) => void;
+  widgetHeight: number;
 }) {
-  const scale = 60;
+  const scale = widgetHeight / puzzle.height;
   const offset = scale / 2;
   const width = puzzle.width * scale;
-  const height = puzzle.height * scale;
+  const height = widgetHeight; // = puzzle.height * scale;
   const place = (x: number) => x * scale + offset;
 
   const dragOriginPositionRef = React.useRef<null | { x: number; y: number }>(
@@ -202,40 +213,42 @@ function MySvg({
     islandValues[index] == puzzle.islands[index].value;
 
   return (
-    <svg
-      width={width}
-      height={height}
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        userSelect: "none",
-      }}
-      onMouseUp={handleMouseUp}
-      onMouseMove={handleMouseMove}
-    >
-      {solution.bridges.map((bridge, index) => (
-        <Bridge
-          key={index}
-          x1={place(puzzle.islands[bridge.from].x)}
-          y1={place(puzzle.islands[bridge.from].y)}
-          x2={place(puzzle.islands[bridge.to].x)}
-          y2={place(puzzle.islands[bridge.to].y)}
-          double={bridge.value == 2}
-          emphasis={bridge.emphasis || 0}
-          highlight={bridge.highlight || false}
-        />
-      ))}
-      {puzzle.islands.map((island, index) => (
-        <Circle
-          key={index}
-          cx={place(island.x)}
-          cy={place(island.y)}
-          text={island.value + ""}
-          onMouseDown={handleIslandMouseDown}
-          index={index}
-          full={islandIsFull(index)}
-        />
-      ))}
-    </svg>
+    <ThemeContext.Provider value={{ scale }}>
+      <svg
+        width={width}
+        height={height}
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          userSelect: "none",
+        }}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
+        {solution.bridges.map((bridge, index) => (
+          <Bridge
+            key={index}
+            x1={place(puzzle.islands[bridge.from].x)}
+            y1={place(puzzle.islands[bridge.from].y)}
+            x2={place(puzzle.islands[bridge.to].x)}
+            y2={place(puzzle.islands[bridge.to].y)}
+            double={bridge.value == 2}
+            emphasis={bridge.emphasis || 0}
+            highlight={bridge.highlight || false}
+          />
+        ))}
+        {puzzle.islands.map((island, index) => (
+          <Circle
+            key={index}
+            cx={place(island.x)}
+            cy={place(island.y)}
+            text={island.value + ""}
+            onMouseDown={handleIslandMouseDown}
+            index={index}
+            full={islandIsFull(index)}
+          />
+        ))}
+      </svg>
+    </ThemeContext.Provider>
   );
 }
 
@@ -304,13 +317,16 @@ function Circle({
   full = false,
   onMouseDown,
 }) {
+  const { scale } = React.useContext(ThemeContext);
+  const radius = (25 / 60) * scale;
+  const fontSize = (24 / 60) * scale;
   const mainColor = full ? "#ccc" : "#fff";
-  const ld = (25 / 2) * 1.41;
+  const ld = (radius / 2) * 1.41;
   return (
     <g onMouseDown={onMouseDown} className={className} data-index={index}>
       <ellipse
-        ry="25"
-        rx="25"
+        ry={radius}
+        rx={radius}
         cy={cy}
         cx={cx}
         strokeWidth="1.5"
@@ -322,7 +338,7 @@ function Circle({
         textAnchor="middle"
         dominantBaseline="middle"
         fontFamily="Helvetica, Arial, sans-serif"
-        fontSize="24"
+        fontSize={fontSize}
         id="svg_2"
         x={cx}
         y={cy}
