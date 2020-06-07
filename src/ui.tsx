@@ -5,8 +5,9 @@ import { usePuzzleController } from "./puzzleController";
 import { addHighlight } from "./solutionEditor";
 import { Button, Dropdown, List } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
+import "./ui.css";
 
-export function SolverUI() {
+export function SolverUI({ height = 700 }) {
   const controller = usePuzzleController();
   const {
     puzzle,
@@ -25,15 +26,13 @@ export function SolverUI() {
         puzzle={puzzle}
         solution={solution}
         onToggleBridge={toggleBridge}
-        widgetHeight={600}
+        widgetHeight={height}
       />
-      <Panel>
+      <Panel height={height}>
         <h2>Select puzzle</h2>
-        <div>
+        <div className="row-nav">
           <Button onClick={controller.previousPuzzle}>Prev</Button>
-
           <Dropdown
-            fluid
             search
             selection
             options={options}
@@ -53,12 +52,12 @@ export function SolverUI() {
           </a>
           .
         </p>
-        <div>
+        <div className="row-actions">
           <Button onClick={controller.reset}>Reset</Button>
           <Button onClick={controller.undo}>Undo</Button>
           <Button onClick={controller.redo}>Redo</Button>
           <Button onClick={controller.solve}>Solve</Button>
-          <Button onClick={controller.solveStep}>Solve step</Button>
+          <Button onClick={controller.solveStep}>Hint</Button>
         </div>
         <List divided relaxed>
           {solutionStack.map((x, n) => (
@@ -108,8 +107,12 @@ function Container({ children }) {
   );
 }
 
-function Panel({ children }) {
-  return <div className="panel">{children}</div>;
+function Panel({ height, children }) {
+  return (
+    <div className="panel" style={{ height }}>
+      {children}
+    </div>
+  );
 }
 
 const ThemeContext = React.createContext({
