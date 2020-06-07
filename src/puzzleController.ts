@@ -85,7 +85,11 @@ export function usePuzzleController(): PuzzleController {
     solve() {
       const newStack = solutionStack.slice();
       let currentSolution = solution;
-      for (;;) {
+      for (let loops = 0; ; ++loops) {
+        if (loops > 200) {
+          console.error("Recursion error");
+          return;
+        }
         let result = solveStep(puzzle, currentSolution);
         if (!result) {
           break;

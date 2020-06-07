@@ -35,8 +35,16 @@ export const tactics: Tactic[] = [
       );
     },
 
-    apply({ solution, meta }) {
-      for (let i = 0; i < meta.desiredValue - meta.currentValue; ++i) {
+    apply({ solution, context, meta }) {
+      if (
+        context.metas[meta.activeNeighbours[0]].remainingValue <
+        meta.remainingValue
+      ) {
+        throw new Error(
+          `Contradiction: ${meta.index} - ${meta.activeNeighbours[0]}`
+        );
+      }
+      for (let i = 0; i < meta.remainingValue; ++i) {
         editor.addBridge(solution, meta.index, meta.activeNeighbours[0]);
       }
       return true;
