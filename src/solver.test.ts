@@ -30,7 +30,7 @@ function checkCollection(collection, expectedCount) {
 
 describe("solver", () => {
   it("should solve some easy puzzles", () => checkCollection(easy, 50));
-  it("should solve some medium puzzles", () => checkCollection(medium, 45));
-  it("should solve some medium+ puzzles", () => checkCollection(medPlus, 26));
+  it("should solve some medium puzzles", () => checkCollection(medium, 47));
+  it("should solve some medium+ puzzles", () => checkCollection(medPlus, 32));
   it("should solve some hard puzzles", () => checkCollection(hard, 1));
 });
