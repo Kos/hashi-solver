@@ -103,7 +103,6 @@ export function usePuzzleController(): PuzzleController {
     },
 
     solveStep() {
-      console.log("solveStep");
       const result = solveStep(puzzle, solution);
       if (!result) {
         return;

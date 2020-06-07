@@ -371,6 +371,42 @@ export const tactics: Tactic[] = [
   },
 
   {
+    label:
+      "If two groups of islands only have one active island left and connecting them would make a dead-end, one bridge has to be added elsewhere.",
+
+    isApplicable({ meta, context }) {
+      return (
+        context.dragons.length > 1 &&
+        meta.activeNeighbours.length == 2 &&
+        meta.remainingValue == 1 &&
+        context.dragons[meta.dragonIndex].heads == 1 &&
+        meta.activeNeighbours.some(
+          (nx) =>
+            context.metas[nx].dragonIndex != meta.dragonIndex &&
+            context.dragons[context.metas[nx].dragonIndex].heads == 1 &&
+            context.metas[nx].remainingValue == 1
+        )
+      );
+    },
+
+    apply({ meta, context, solution }) {
+      for (let nx of meta.activeNeighbours) {
+        if (
+          !(
+            context.metas[nx].dragonIndex != meta.dragonIndex &&
+            context.dragons[context.metas[nx].dragonIndex].heads == 1 &&
+            context.metas[nx].remainingValue == 1
+          )
+        ) {
+          editor.addBridge(solution, meta.index, nx);
+          return true;
+        }
+      }
+      return false;
+    },
+  },
+
+  {
     label: "STUB",
 
     isApplicable({ meta }) {

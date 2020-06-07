@@ -2,7 +2,7 @@ import { solve } from "./solver";
 import { Puzzle } from "./types";
 import * as easy from "../puzzles/ConceptisEasy.json";
 import * as medium from "../puzzles/ConceptisMedium.json";
-import * as mediumPlus from "../puzzles/ConceptisMediumPlus.json";
+import * as medPlus from "../puzzles/ConceptisMediumPlus.json";
 import * as hard from "../puzzles/ConceptisHard.json";
 
 function checkCollection(collection, expectedCount) {
@@ -30,7 +30,7 @@ function checkCollection(collection, expectedCount) {
 
 describe("solver", () => {
   it("should solve some easy puzzles", () => checkCollection(easy, 50));
-  it("should solve some medium puzzles", () => checkCollection(medium, 23));
-  it("should solve some medium+ puzzles", () => checkCollection(mediumPlus, 8));
+  it("should solve some medium puzzles", () => checkCollection(medium, 43));
+  it("should solve some medium+ puzzles", () => checkCollection(medPlus, 25));
   it("should solve some hard puzzles", () => checkCollection(hard, 1));
 });
