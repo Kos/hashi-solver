@@ -267,6 +267,28 @@ export const tactics: Tactic[] = [
 
   {
     label:
+      "A node that has only one neighbour that is not a '1' must have at least one bridge to this neighbour.",
+
+    isApplicable({ context, meta }) {
+      return (
+        meta.neighbours.filter((nx) => context.metas[nx].desiredValue === 1)
+          .length ==
+        meta.neighbours.length - 1
+      );
+    },
+
+    apply({ solution, context, meta }) {
+      for (let nx of meta.neighbours) {
+        if (context.metas[nx].desiredValue != 1) {
+          return editor.ensureOneBridge(solution, meta.index, nx);
+        }
+      }
+      return false;
+    },
+  },
+
+  {
+    label:
       "A '3' that has three neighbours, where two of them are '1' and '2', should have at least one bridge to the third one.",
 
     isApplicable({ meta }) {
