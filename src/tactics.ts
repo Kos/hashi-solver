@@ -297,6 +297,26 @@ export const tactics: Tactic[] = [
 
   {
     label:
+      "An unconnected '3' with remaining neighbours must have at least one bridge to each.",
+
+    isApplicable({ meta }) {
+      return (
+        meta.currentValue == 0 &&
+        meta.activeNeighbours.length == 2 &&
+        meta.desiredValue == 3
+      );
+    },
+
+    apply({ solution, meta }) {
+      return [
+        editor.ensureOneBridge(solution, meta.index, meta.activeNeighbours[0]),
+        editor.ensureOneBridge(solution, meta.index, meta.activeNeighbours[1]),
+      ].some(id);
+    },
+  },
+
+  {
+    label:
       "A '3' that has three neighbours, where two of them are '1' and '2', should have at least one bridge to the third one.",
 
     isApplicable({ meta }) {
