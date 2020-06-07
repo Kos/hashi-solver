@@ -1,5 +1,6 @@
 import * as easyPuzzles from "../puzzles/ConceptisEasy.json";
 import * as mediumPuzzles from "../puzzles/ConceptisMedium.json";
+import * as mediumPlusPuzzles from "../puzzles/ConceptisMediumPlus.json";
 import { Puzzle, PuzzleObject } from "./types";
 
 function load(collection: { name: string; puzzles: PuzzleObject[] }) {
@@ -9,4 +10,8 @@ function load(collection: { name: string; puzzles: PuzzleObject[] }) {
   }));
 }
 
-export const library = [...load(easyPuzzles), ...load(mediumPuzzles)];
+export const library = [
+  ...load(easyPuzzles),
+  ...load(mediumPuzzles),
+  ...load(mediumPlusPuzzles),
+];
