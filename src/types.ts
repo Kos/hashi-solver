@@ -33,7 +33,7 @@ export class Puzzle {
 
     if (data) {
       islands = [];
-      data = data.replace(/ /g, "");
+      data = data.replace(/ |\n/g, "");
       for (let i = 0; i < data.length; ++i) {
         const value = +data[i];
         if (isNaN(+value)) continue;
